@@ -489,6 +489,7 @@ function renderHoverPanel(champId) {
   }
 
   tooltipEl.innerHTML = `
+    <div class="hp-champ-header">${displayName}</div>
     <div class="hp-section">${tagsHtml}</div>
     <div class="hp-divider"></div>
     <div class="hp-section">${ctrsHtml}</div>
