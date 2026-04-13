@@ -13,6 +13,28 @@ let junglerOn         = false;
 let kwPanelOpen       = false;
 let currentCardPanelId = null;
 
+function cloneChampDatum(data) {
+  return {
+    tags: [...((data && data.tags) || [])],
+    counters: [...((data && data.counters) || [])]
+  };
+}
+
+function getSeedChampData() {
+  const seed = {};
+  if (typeof DEFAULT_CHAMP_DATA !== 'undefined') {
+    Object.keys(DEFAULT_CHAMP_DATA).forEach(id => {
+      seed[id] = cloneChampDatum(DEFAULT_CHAMP_DATA[id]);
+    });
+  }
+  if (typeof PERSONAL_CHAMP_DATA !== 'undefined') {
+    Object.keys(PERSONAL_CHAMP_DATA).forEach(id => {
+      seed[id] = cloneChampDatum(PERSONAL_CHAMP_DATA[id]);
+    });
+  }
+  return seed;
+}
+
 // ===== PERSISTENCE =====
 function loadState() {
   try {
@@ -27,13 +49,17 @@ function loadState() {
   } catch (e) { /* ignore */ }
 
   // Seed default tags/counters for any champion not yet edited by user
-  if (typeof DEFAULT_CHAMP_DATA !== 'undefined') {
-    Object.keys(DEFAULT_CHAMP_DATA).forEach(id => {
-      if (!state.champData[id]) {
-        state.champData[id] = JSON.parse(JSON.stringify(DEFAULT_CHAMP_DATA[id]));
-      }
-    });
-  }
+  const seedChampData = getSeedChampData();
+  Object.keys(seedChampData).forEach(id => {
+    const existing = state.champData[id];
+    const hasAnyLocalData = existing && (
+      ((existing.tags || []).length > 0) ||
+      ((existing.counters || []).length > 0)
+    );
+    if (!hasAnyLocalData) {
+      state.champData[id] = cloneChampDatum(seedChampData[id]);
+    }
+  });
 
   // Auto-mark default junglers for any pool members not yet flagged
   if (typeof DEFAULT_JUNGLERS !== 'undefined') {
@@ -103,7 +129,7 @@ function renderPoolGrid() {
 // ===== KEYWORD CHIPS =====
 function buildKeywordChips() {
   const all = new Set();
-  Object.values(DEFAULT_CHAMP_DATA).forEach(d => (d.tags || []).forEach(t => all.add(t)));
+  Object.values(getSeedChampData()).forEach(d => (d.tags || []).forEach(t => all.add(t)));
   Object.values(state.champData).forEach(d => (d.tags || []).forEach(t => all.add(t)));
   (state.extraTags || []).forEach(t => all.add(t));
 
@@ -325,7 +351,7 @@ let hpSourceCard         = null;    // the card that triggered the current panel
 
 function allKeywordTags() {
   const all = new Set();
-  Object.values(DEFAULT_CHAMP_DATA).forEach(d => (d.tags || []).forEach(t => all.add(t)));
+  Object.values(getSeedChampData()).forEach(d => (d.tags || []).forEach(t => all.add(t)));
   Object.values(state.champData).forEach(d => (d.tags || []).forEach(t => all.add(t)));
   (state.extraTags || []).forEach(t => all.add(t));
   return all;
