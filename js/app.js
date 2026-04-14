@@ -19,6 +19,8 @@ const I18N = {
     search_ph: "Search champion / tag...",
     clear_search: "Clear search",
     my_pool: "My Champion Pool",
+    filter_pool_only: "Pool only",
+    filter_starred_only: "Starred only",
     tagline: "Craft your own BP codex, shaped by your understanding!",
     back_to_top: "Back to top",
     btn_back: "← Back",
@@ -97,6 +99,8 @@ const I18N = {
     search_ph: "搜索英雄 / 词条...",
     clear_search: "清除搜索",
     my_pool: "我的英雄池",
+    filter_pool_only: "英雄池",
+    filter_starred_only: "星标",
     tagline: "根据你的理解修改出属于自己的BP宝典！",
     back_to_top: "回到顶部",
     btn_back: "← 返回",
@@ -273,6 +277,8 @@ let state = {
 
 let currentAddLane    = 'all';
 let activeKeywords    = new Set();   // currently selected keyword chips (multi-select, AND filter)
+let filterPoolOnly    = false;       // "英雄池" checkbox: only show champs in pool
+let filterStarredOnly = false;       // "星标" checkbox: only show starred champs
 let editingChampId    = null;
 let junglerOn         = false;
 let kwPanelOpen       = false;
@@ -716,12 +722,23 @@ function renderAddGrid() {
   }
 
   // Order: starred → selected junglers → selected non-junglers → unselected
-  const selStarred   = champs.filter(c =>  state.pool.has(c.id) &&  state.starred.has(c.id));
-  const selJungle    = champs.filter(c =>  state.pool.has(c.id) && !state.starred.has(c.id) &&  state.junglers.has(c.id));
-  const selNonJungle = champs.filter(c =>  state.pool.has(c.id) && !state.starred.has(c.id) && !state.junglers.has(c.id));
-  const unselected   = champs.filter(c => !state.pool.has(c.id));
+  let selStarred   = champs.filter(c =>  state.pool.has(c.id) &&  state.starred.has(c.id));
+  let selJungle    = champs.filter(c =>  state.pool.has(c.id) && !state.starred.has(c.id) &&  state.junglers.has(c.id));
+  let selNonJungle = champs.filter(c =>  state.pool.has(c.id) && !state.starred.has(c.id) && !state.junglers.has(c.id));
+  let unselected   = champs.filter(c => !state.pool.has(c.id));
+
+  // "Starred only" wins over "Pool only" (starred is a subset of pool).
+  if (filterStarredOnly) {
+    selJungle = [];
+    selNonJungle = [];
+    unselected = [];
+  } else if (filterPoolOnly) {
+    unselected = [];
+  }
 
   label.classList.toggle('hidden', selStarred.length === 0 && selJungle.length === 0 && selNonJungle.length === 0);
+  const filterBar = document.getElementById('pool-filters');
+  if (filterBar) filterBar.classList.toggle('hidden', selStarred.length === 0 && selJungle.length === 0 && selNonJungle.length === 0);
 
   grid.innerHTML = '';
   selStarred.forEach(c   => grid.appendChild(buildCard(c, 'add')));
@@ -729,6 +746,18 @@ function renderAddGrid() {
   selNonJungle.forEach(c => grid.appendChild(buildCard(c, 'add')));
   unselected.forEach(c   => grid.appendChild(buildCard(c, 'add')));
 
+}
+
+function togglePoolFilter() {
+  const el = document.getElementById('filter-pool-only');
+  filterPoolOnly = !!(el && el.checked);
+  renderAddGrid();
+}
+
+function toggleStarredFilter() {
+  const el = document.getElementById('filter-starred-only');
+  filterStarredOnly = !!(el && el.checked);
+  renderAddGrid();
 }
 
 // ===== BUILD CHAMPION CARD =====

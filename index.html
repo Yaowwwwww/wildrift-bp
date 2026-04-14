@@ -60,6 +60,18 @@
     <span class="tagline-line"></span>
   </div>
   <div id="add-selected-label" class="add-selected-label hidden" data-i18n="my_pool">我的英雄池</div>
+  <div id="pool-filters" class="pool-filters hidden">
+    <label class="pool-filter-check">
+      <input type="checkbox" id="filter-pool-only" onchange="togglePoolFilter()">
+      <span class="pool-filter-box"></span>
+      <span class="pool-filter-label" data-i18n="filter_pool_only">英雄池</span>
+    </label>
+    <label class="pool-filter-check">
+      <input type="checkbox" id="filter-starred-only" onchange="toggleStarredFilter()">
+      <span class="pool-filter-box"></span>
+      <span class="pool-filter-label" data-i18n="filter_starred_only">星标</span>
+    </label>
+  </div>
   <div id="add-grid" class="champ-grid"></div>
   <button id="back-to-top" class="back-to-top is-hidden" onclick="scrollAddGridToTop()" data-i18n-title="back_to_top" title="回到顶部">↑</button>
   <footer class="site-footer">
