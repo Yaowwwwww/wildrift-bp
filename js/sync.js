@@ -525,6 +525,9 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 
     if (isLocal || !client) {
       showDummy();
+      // Local-only: also query the real DB total so you can see it during
+      // development even though the displayed counter uses dummy data.
+      if (client) showRealCountInFooter();
       return;
     }
 
@@ -573,6 +576,28 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
     const next = displayedVisits + delta;
     renderVisitCount(next, true);
     try { localStorage.setItem(DUMMY_KEY, String(next)); } catch (e) {}
+  }
+
+  // Local-dev only: read the real DB total (no increment) and append a small
+  // info span to the footer so you can see the actual production count while
+  // the displayed number uses dummy data.
+  function showRealCountInFooter() {
+    if (!client) return;
+    client.from('site_stats').select('total_visits').eq('id', 1).maybeSingle()
+      .then(({ data, error }) => {
+        if (error || !data) return;
+        const footer = document.querySelector('.site-footer');
+        if (!footer) return;
+        let el = document.getElementById('real-visit-count');
+        if (!el) {
+          const span = document.createElement('span');
+          span.className = 'footer-real-visits';
+          span.innerHTML = '实际总访问: <span id="real-visit-count">—</span>';
+          footer.insertBefore(span, footer.querySelector('.title-version'));
+          el = span.querySelector('#real-visit-count');
+        }
+        el.textContent = (data.total_visits || 0).toLocaleString();
+      }).catch(() => {});
   }
 
   // Public: fired by app.js on UI state changes (lane switch, screen change).

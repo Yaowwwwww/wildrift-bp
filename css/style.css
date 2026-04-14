@@ -1009,6 +1009,18 @@ input  { font-family: inherit; }
   margin-left: 2px;
   transition: transform 0.25s ease;
 }
+.footer-real-visits {
+  font-size: 0.78rem;
+  color: #666;
+  letter-spacing: 1px;
+  font-weight: 400;
+  font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+}
+.footer-real-visits #real-visit-count {
+  color: #aaa;
+  font-weight: 500;
+  margin-left: 2px;
+}
 .visit-bubble {
   position: absolute;
   top: -14px;
