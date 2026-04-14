@@ -12,21 +12,63 @@ let editingChampId    = null;
 let junglerOn         = false;
 let kwPanelOpen       = false;
 let currentCardPanelId = null;
+let usePersonalData   = false;
+const LEGACY_STATE_STORAGE_KEY = 'wr-bp-v1';
+
+function isLocalDevEnvironment() {
+  const host = window.location.hostname;
+  return window.location.protocol === 'file:' ||
+    host === 'localhost' ||
+    host === '127.0.0.1' ||
+    host === '0.0.0.0' ||
+    host.endsWith('.local');
+}
+
+function hasOwn(obj, key) {
+  return Object.prototype.hasOwnProperty.call(obj, key);
+}
+
+function hasAnyChampData(data) {
+  return ((data && data.tags) || []).length > 0 ||
+    ((data && data.counters) || []).length > 0 ||
+    ((data && data.beCounteredBy) || []).length > 0;
+}
 
 function cloneChampDatum(data) {
-  return {
+  const cloned = {
     tags: [...((data && data.tags) || [])],
     counters: [...((data && data.counters) || [])]
   };
+  if (data && hasOwn(data, 'beCounteredBy')) {
+    cloned.beCounteredBy = [...(data.beCounteredBy || [])];
+  }
+  return cloned;
 }
 
-function getSeedChampData() {
+function sameChampDatum(a, b) {
+  const aTags = (a && a.tags) || [];
+  const bTags = (b && b.tags) || [];
+  const aCounters = (a && a.counters) || [];
+  const bCounters = (b && b.counters) || [];
+  const aBeCounteredBy = (a && a.beCounteredBy) || [];
+  const bBeCounteredBy = (b && b.beCounteredBy) || [];
+  return JSON.stringify(aTags) === JSON.stringify(bTags) &&
+    JSON.stringify(aCounters) === JSON.stringify(bCounters) &&
+    JSON.stringify(aBeCounteredBy) === JSON.stringify(bBeCounteredBy);
+}
+
+function getDefaultChampData() {
   const seed = {};
   if (typeof DEFAULT_CHAMP_DATA !== 'undefined') {
     Object.keys(DEFAULT_CHAMP_DATA).forEach(id => {
       seed[id] = cloneChampDatum(DEFAULT_CHAMP_DATA[id]);
     });
   }
+  return seed;
+}
+
+function getPersonalChampData() {
+  const seed = getDefaultChampData();
   if (typeof PERSONAL_CHAMP_DATA !== 'undefined') {
     Object.keys(PERSONAL_CHAMP_DATA).forEach(id => {
       seed[id] = cloneChampDatum(PERSONAL_CHAMP_DATA[id]);
@@ -35,31 +77,119 @@ function getSeedChampData() {
   return seed;
 }
 
+function getBaseChampData() {
+  return usePersonalData ? getPersonalChampData() : getDefaultChampData();
+}
+
+function createEmptyState() {
+  return {
+    pool: new Set(),
+    junglers: new Set(),
+    champData: {},
+    extraTags: []
+  };
+}
+
+function getStateStorageKey() {
+  return usePersonalData ? 'wr-bp-personal-v1' : 'wr-bp-default-v1';
+}
+
+function getEffectiveChampData(champId) {
+  if (hasOwn(state.champData, champId)) return state.champData[champId];
+  return getBaseChampData()[champId] || { tags: [], counters: [] };
+}
+
+function getEffectiveChampDataMap() {
+  const map = getBaseChampData();
+  Object.keys(state.champData).forEach(id => {
+    map[id] = cloneChampDatum(state.champData[id]);
+  });
+  return map;
+}
+
+function ensureChampDataOverride(champId) {
+  if (!hasOwn(state.champData, champId)) {
+    state.champData[champId] = cloneChampDatum(getEffectiveChampData(champId));
+  }
+  if (!state.champData[champId].tags) state.champData[champId].tags = [];
+  if (!state.champData[champId].counters) state.champData[champId].counters = [];
+  if (!state.champData[champId].beCounteredBy) state.champData[champId].beCounteredBy = [];
+  return state.champData[champId];
+}
+
+function normalizeStoredChampData(rawChampData, baseData = getBaseChampData()) {
+  const normalized = {};
+
+  Object.keys(rawChampData || {}).forEach(id => {
+    const datum = cloneChampDatum(rawChampData[id]);
+    if (!hasAnyChampData(datum) && !hasOwn(baseData, id)) {
+      normalized[id] = datum;
+      return;
+    }
+    if (sameChampDatum(datum, baseData[id])) {
+      return;
+    }
+    normalized[id] = datum;
+  });
+
+  return normalized;
+}
+
+function rerenderCurrentView() {
+  hideHoverPanel();
+  buildKeywordChips();
+  renderAddGrid();
+  if (document.getElementById('pool-screen').classList.contains('active')) {
+    renderPoolGrid();
+  }
+  if (editingChampId) {
+    closeModal();
+  }
+}
+
+function refreshStoredOverrides() {
+  state.champData = normalizeStoredChampData(state.champData, getBaseChampData());
+  saveState();
+}
+
+function initDataModeToggle() {
+  const wrap = document.getElementById('local-data-toggle');
+  const input = document.getElementById('use-personal-data-toggle');
+  if (!wrap || !input) return;
+
+  if (!isLocalDevEnvironment()) {
+    wrap.remove();
+    usePersonalData = false;
+    return;
+  }
+
+  usePersonalData = localStorage.getItem('wr-bp-use-personal-data') === 'true';
+  wrap.classList.remove('hidden');
+  input.checked = usePersonalData;
+  input.addEventListener('change', () => {
+    saveState();
+    usePersonalData = input.checked;
+    localStorage.setItem('wr-bp-use-personal-data', usePersonalData ? 'true' : 'false');
+    loadState();
+    refreshStoredOverrides();
+    rerenderCurrentView();
+  });
+}
+
 // ===== PERSISTENCE =====
 function loadState() {
+  state = createEmptyState();
   try {
-    const raw = localStorage.getItem('wr-bp-v1');
+    const raw = localStorage.getItem(getStateStorageKey()) ||
+      (usePersonalData ? localStorage.getItem(LEGACY_STATE_STORAGE_KEY) : null);
     if (raw) {
       const parsed = JSON.parse(raw);
       state.pool       = new Set(parsed.pool      || []);
       state.junglers   = new Set(parsed.junglers  || []);
-      state.champData  = parsed.champData || {};
+      state.champData  = normalizeStoredChampData(parsed.champData || {}, getBaseChampData());
       state.extraTags  = parsed.extraTags  || [];
     }
   } catch (e) { /* ignore */ }
-
-  // Seed default tags/counters for any champion not yet edited by user
-  const seedChampData = getSeedChampData();
-  Object.keys(seedChampData).forEach(id => {
-    const existing = state.champData[id];
-    const hasAnyLocalData = existing && (
-      ((existing.tags || []).length > 0) ||
-      ((existing.counters || []).length > 0)
-    );
-    if (!hasAnyLocalData) {
-      state.champData[id] = cloneChampDatum(seedChampData[id]);
-    }
-  });
 
   // Auto-mark default junglers for any pool members not yet flagged
   if (typeof DEFAULT_JUNGLERS !== 'undefined') {
@@ -71,7 +201,7 @@ function loadState() {
 }
 
 function saveState() {
-  localStorage.setItem('wr-bp-v1', JSON.stringify({
+  localStorage.setItem(getStateStorageKey(), JSON.stringify({
     pool:      [...state.pool],
     junglers:  [...state.junglers],
     champData: state.champData,
@@ -98,7 +228,7 @@ function champMatchesQuery(c, query) {
   if (c.name.toLowerCase().includes(query)) return true;
   if (c.id.toLowerCase().includes(query))   return true;
   if (c.zhName && c.zhName.includes(query)) return true;
-  const tags = (state.champData[c.id] || {}).tags || [];
+  const tags = getEffectiveChampData(c.id).tags || [];
   return tags.some(t => t.includes(query));
 }
 
@@ -129,8 +259,7 @@ function renderPoolGrid() {
 // ===== KEYWORD CHIPS =====
 function buildKeywordChips() {
   const all = new Set();
-  Object.values(getSeedChampData()).forEach(d => (d.tags || []).forEach(t => all.add(t)));
-  Object.values(state.champData).forEach(d => (d.tags || []).forEach(t => all.add(t)));
+  Object.values(getEffectiveChampDataMap()).forEach(d => (d.tags || []).forEach(t => all.add(t)));
   (state.extraTags || []).forEach(t => all.add(t));
 
   const container = document.getElementById('keyword-chips');
@@ -249,7 +378,7 @@ function renderAddGrid() {
 
   if (activeKeyword) {
     champs = champs.filter(c => {
-      const tags = (state.champData[c.id] || {}).tags || [];
+      const tags = getEffectiveChampData(c.id).tags || [];
       return tags.includes(activeKeyword);
     });
   } else if (query) {
@@ -351,8 +480,7 @@ let hpSourceCard         = null;    // the card that triggered the current panel
 
 function allKeywordTags() {
   const all = new Set();
-  Object.values(getSeedChampData()).forEach(d => (d.tags || []).forEach(t => all.add(t)));
-  Object.values(state.champData).forEach(d => (d.tags || []).forEach(t => all.add(t)));
+  Object.values(getEffectiveChampDataMap()).forEach(d => (d.tags || []).forEach(t => all.add(t)));
   (state.extraTags || []).forEach(t => all.add(t));
   return all;
 }
@@ -399,10 +527,22 @@ function positionHoverPanel(cardEl) {
   let top  = ref.bottom;
   if (left + pw > window.innerWidth - 6) left = window.innerWidth - pw - 6;
   if (left < 6) left = 6;
-  if (top + ph  > window.innerHeight - 6) top = ref.top - ph;
+  if (top + ph > window.innerHeight - 6) {
+    const topAbove = ref.top - ph;
+    top = topAbove >= 6 ? topAbove : ref.bottom;
+  }
+  if (top < 6) top = 6;
+  if (top + ph > window.innerHeight - 6) top = window.innerHeight - ph - 6;
   tooltipEl.style.left = left + 'px';
   tooltipEl.style.top  = top  + 'px';
 }
+
+// Reposition hover panel on scroll so it follows the source card
+document.addEventListener('scroll', () => {
+  if (hpSourceCard && !tooltipEl.classList.contains('hidden')) {
+    positionHoverPanel(hpSourceCard);
+  }
+}, { passive: true, capture: true });
 
 function hideHoverPanel() {
   tooltipEl.classList.add('hidden');
@@ -419,7 +559,7 @@ function hideHoverPanel() {
 // Compute "被克制": all champions whose counters list includes champId
 function getBeCounteredBy(champId) {
   return ALL_CHAMPIONS.filter(c => {
-    const cdata = state.champData[c.id];
+    const cdata = getEffectiveChampData(c.id);
     return cdata && (cdata.counters || []).includes(champId);
   });
 }
@@ -427,7 +567,7 @@ function getBeCounteredBy(champId) {
 function renderHoverPanel(champId) {
   const champ = ALL_CHAMPIONS.find(c => c.id === champId);
   if (!champ) return;
-  const data       = state.champData[champId] || {};
+  const data       = getEffectiveChampData(champId);
   const tags       = data.tags     || [];
   const counters   = data.counters || [];
   const beCountered = getBeCounteredBy(champId); // dynamic, computed
@@ -480,7 +620,7 @@ function renderHoverPanel(champId) {
     });
     ctrsHtml += '</div>';
   } else if (!hpCounterSearchOpen) {
-    ctrsHtml += '<div class="hp-empty">暂无克制设置</div>';
+    ctrsHtml += '<div class="hp-empty">暂无克制记录</div>';
   }
   if (hpCounterSearchOpen) {
     ctrsHtml += `<input type="text" class="hp-counter-search" id="hp-counter-search"
@@ -518,9 +658,13 @@ function renderHoverPanel(champId) {
     <div class="hp-champ-header">${displayName}</div>
     <div class="hp-section">${tagsHtml}</div>
     <div class="hp-divider"></div>
+    <div class="hp-hint"><span class="hp-hint-label">阵容关键词推荐：</span><br>1.<span class="hp-kw">肉</span>（视野） 2.<span class="hp-kw">前期/节奏</span> 3.<span class="hp-kw">后期/大C射手</span> 4.<span class="hp-kw">增益</span> 5.<span class="hp-kw">收割/刺客</span> 6.<span class="hp-kw">控制</span>（越多越好）</div>
+    <div class="hp-divider"></div>
     <div class="hp-section">${ctrsHtml}</div>
     <div class="hp-divider"></div>
     <div class="hp-section">${beCtrsHtml}</div>
+    <div class="hp-divider"></div>
+    <div class="hp-hint"><span class="hp-hint-label">通用克制链（→表示克制）：</span><br><span class="hp-kw">刺客/控制/爆发</span> → <span class="hp-kw">后期大C射手</span><br><span class="hp-kw">后期大C射手</span> → <span class="hp-kw">肉</span><br><span class="hp-kw">肉</span> → <span class="hp-kw">刺客/爆发</span></div>
   `;
 
   const focusId = hpCounterSearchOpen ? 'hp-counter-search' : hpBeCounterSearchOpen ? 'hp-be-counter-search' : null;
@@ -555,10 +699,9 @@ function toggleHpBeCounterSearch() {
 }
 
 function hpAddTag(champId, tag) {
-  if (!state.champData[champId]) state.champData[champId] = { tags: [], counters: [] };
-  if (!state.champData[champId].tags) state.champData[champId].tags = [];
-  if (!state.champData[champId].tags.includes(tag)) {
-    state.champData[champId].tags.push(tag);
+  const data = ensureChampDataOverride(champId);
+  if (!data.tags.includes(tag)) {
+    data.tags.push(tag);
     saveState();
   }
   hpTagPickerOpen = false;
@@ -566,8 +709,8 @@ function hpAddTag(champId, tag) {
 }
 
 function hpRemoveTag(champId, tag) {
-  if (!state.champData[champId]) return;
-  state.champData[champId].tags = (state.champData[champId].tags || []).filter(t => t !== tag);
+  const data = ensureChampDataOverride(champId);
+  data.tags = (data.tags || []).filter(t => t !== tag);
   saveState();
   renderHoverPanel(champId);
 }
@@ -577,7 +720,7 @@ function hpRenderCounterResults(champId, query) {
   if (!results) return;
   const q = query.toLowerCase().trim();
   if (!q) { results.innerHTML = ''; return; }
-  const existing = new Set((state.champData[champId] || {}).counters || []);
+  const existing = new Set((getEffectiveChampData(champId) || {}).counters || []);
   const candidates = ALL_CHAMPIONS.filter(c => {
     if (c.id === champId || existing.has(c.id)) return false;
     return c.name.toLowerCase().includes(q) || (c.zhName && c.zhName.includes(q));
@@ -595,10 +738,9 @@ function hpRenderCounterResults(champId, query) {
 }
 
 function hpAddCounter(champId, targetId) {
-  if (!state.champData[champId]) state.champData[champId] = { tags: [], counters: [] };
-  if (!state.champData[champId].counters) state.champData[champId].counters = [];
-  if (!state.champData[champId].counters.includes(targetId)) {
-    state.champData[champId].counters.push(targetId);
+  const data = ensureChampDataOverride(champId);
+  if (!data.counters.includes(targetId)) {
+    data.counters.push(targetId);
     saveState();
   }
   const inp = document.getElementById('hp-counter-search');
@@ -612,11 +754,10 @@ function hpAddCounter(champId, targetId) {
 
 function hpRemoveCounter(champId, targetId) {
   // champId counters targetId → remove targetId from champId.counters
-  if (!state.champData[champId]) return;
-  state.champData[champId].counters = (state.champData[champId].counters || []).filter(c => c !== targetId);
+  const data = ensureChampDataOverride(champId);
+  data.counters = (data.counters || []).filter(c => c !== targetId);
   saveState();
   renderHoverPanel(champId);
-  // Note: getBeCounteredBy(targetId) recomputes dynamically, no extra write needed
 }
 
 // ── 被克制 functions ──
@@ -645,11 +786,9 @@ function hpRenderBeCounterResults(champId, query) {
 }
 
 function hpAddBeCounter(champId, sourceId) {
-  // sourceId counters champId → add champId to sourceId.counters
-  if (!state.champData[sourceId]) state.champData[sourceId] = { tags: [], counters: [] };
-  if (!state.champData[sourceId].counters) state.champData[sourceId].counters = [];
-  if (!state.champData[sourceId].counters.includes(champId)) {
-    state.champData[sourceId].counters.push(champId);
+  const sourceData = ensureChampDataOverride(sourceId);
+  if (!sourceData.counters.includes(champId)) {
+    sourceData.counters.push(champId);
     saveState();
   }
   const inp = document.getElementById('hp-be-counter-search');
@@ -662,9 +801,8 @@ function hpAddBeCounter(champId, sourceId) {
 }
 
 function hpRemoveBeCounter(champId, sourceId) {
-  // Remove champId from sourceId.counters
-  if (!state.champData[sourceId]) return;
-  state.champData[sourceId].counters = (state.champData[sourceId].counters || []).filter(c => c !== champId);
+  const sourceData = ensureChampDataOverride(sourceId);
+  sourceData.counters = (sourceData.counters || []).filter(c => c !== champId);
   saveState();
   renderHoverPanel(champId);
 }
@@ -726,7 +864,7 @@ function openModal(id) {
   if (!champ) return;
 
   // Ensure data slot exists
-  if (!state.champData[id]) state.champData[id] = { tags: [], counters: [] };
+  ensureChampDataOverride(id);
 
   junglerOn = state.junglers.has(id);
 
@@ -758,7 +896,7 @@ function closeModal() {
 
 // --- Tags ---
 function renderModalTags() {
-  const tags = (state.champData[editingChampId] || {}).tags || [];
+  const tags = getEffectiveChampData(editingChampId).tags || [];
   const el   = document.getElementById('modal-tags');
   el.innerHTML = '';
 
@@ -775,7 +913,7 @@ function addTag() {
   const val   = input.value.trim();
   if (!val || !editingChampId) return;
 
-  const data = state.champData[editingChampId];
+  const data = ensureChampDataOverride(editingChampId);
   if (!data.tags.includes(val)) data.tags.push(val);
   input.value = '';
   saveState();
@@ -784,14 +922,14 @@ function addTag() {
 
 function removeTag(i) {
   if (!editingChampId) return;
-  state.champData[editingChampId].tags.splice(i, 1);
+  ensureChampDataOverride(editingChampId).tags.splice(i, 1);
   saveState();
   renderModalTags();
 }
 
 // --- Counters ---
 function renderModalCounters() {
-  const counters = (state.champData[editingChampId] || {}).counters || [];
+  const counters = getEffectiveChampData(editingChampId).counters || [];
   const el       = document.getElementById('modal-counters');
   el.innerHTML   = '';
 
@@ -821,7 +959,7 @@ function renderCounterDropdown() {
 
   if (!query) return;
 
-  const existing = new Set((state.champData[editingChampId] || {}).counters || []);
+  const existing = new Set((getEffectiveChampData(editingChampId) || {}).counters || []);
   const results  = ALL_CHAMPIONS.filter(c =>
     c.id !== editingChampId &&
     !existing.has(c.id) &&
@@ -841,9 +979,10 @@ function renderCounterDropdown() {
 
 function addCounter(cid) {
   if (!editingChampId) return;
-  const data = state.champData[editingChampId];
-  if (!data.counters) data.counters = [];
-  if (!data.counters.includes(cid)) data.counters.push(cid);
+  const data = ensureChampDataOverride(editingChampId);
+  if (!data.counters.includes(cid)) {
+    data.counters.push(cid);
+  }
 
   document.getElementById('counter-input').value    = '';
   document.getElementById('counter-dropdown').innerHTML = '';
@@ -853,7 +992,7 @@ function addCounter(cid) {
 
 function removeCounter(cid) {
   if (!editingChampId) return;
-  const arr = state.champData[editingChampId].counters;
+  const arr = ensureChampDataOverride(editingChampId).counters;
   const idx = arr.indexOf(cid);
   if (idx > -1) arr.splice(idx, 1);
   saveState();
@@ -918,6 +1057,8 @@ document.addEventListener('click', e => {
 });
 
 // ===== INIT =====
+initDataModeToggle();
 loadState();
+refreshStoredOverrides();
 buildKeywordChips();
 renderAddGrid();
