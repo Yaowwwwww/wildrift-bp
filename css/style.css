@@ -283,7 +283,7 @@ input  { font-family: inherit; }
 .card-badge-hollow {
   position: absolute;
   top: 1.2px;
-  right: 7.5px;
+  right: 7.7px;
   width: 16px;
   height: 16px;
   box-sizing: border-box;
@@ -302,7 +302,7 @@ input  { font-family: inherit; }
 .card-star {
   position: absolute;
   top: 1.2px;
-  left: 7.5px;
+  left: 7.7px;
   width: 16px;
   height: 16px;
   padding: 0;
@@ -322,10 +322,11 @@ input  { font-family: inherit; }
   transition: opacity 0.15s ease, background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
 }
 .champ-card:hover .card-star { opacity: 0.9; }
-.card-star:hover {
+.card-star:not(.is-starred):hover {
   opacity: 1;
   background: rgba(240, 230, 140, 0.22);
   border: 1px solid #f0e68c;
+  transform: scale(1.1);
 }
 .card-star.is-starred {
   opacity: 1;
