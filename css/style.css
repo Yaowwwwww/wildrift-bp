@@ -36,6 +36,13 @@ input  { font-family: inherit; }
   flex-shrink: 0;
 }
 
+.nav-logo {
+  width: 70px;
+  height: 70px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
 .local-data-toggle {
   margin-left: auto;
   display: inline-flex;
