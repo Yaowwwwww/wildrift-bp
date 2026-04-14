@@ -1,8 +1,8 @@
 // ===== SUPABASE AUTH + CLOUD SYNC =====
 //
 // Fill these in after creating your Supabase project (see SETUP.md):
-const SUPABASE_URL      = 'YOUR_SUPABASE_URL';       // e.g. https://xxxxxxxx.supabase.co
-const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';  // the anon/public key — safe to commit
+const SUPABASE_URL      = 'https://vcmhccmasvguhukptcze.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZjbWhjY21hc3ZndWh1a3B0Y3plIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYxNzk4MjAsImV4cCI6MjA5MTc1NTgyMH0.eepl3G8gmBQ1Ldm_udmHJ04lipyumuvk-UHVEQYodTg';
 //
 // Both values above are public by design. All access is gated by Postgres
 // Row-Level Security (see SETUP.md). Never put the service_role key here.
