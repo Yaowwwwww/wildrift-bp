@@ -474,6 +474,7 @@ let hpTagPickerOpen      = false;
 let hpCounterSearchOpen  = false;
 let hpBeCounterSearchOpen = false;
 let hpTimeout            = null;
+let hpShowTimeout        = null;
 let hpLocked             = false;   // suppresses all hover during navigation
 let hpLockTimer          = null;
 let hpSourceCard         = null;    // the card that triggered the current panel
@@ -489,9 +490,11 @@ function attachHoverPanel(el, champ) {
   el.addEventListener('mouseenter', () => {
     if (hpLocked) return; // fully suppressed during navigation
     clearTimeout(hpTimeout);
-    showHoverPanel(champ, el);
+    clearTimeout(hpShowTimeout);
+    hpShowTimeout = setTimeout(() => showHoverPanel(champ, el), 300);
   });
   el.addEventListener('mouseleave', (e) => {
+    clearTimeout(hpShowTimeout);
     if (el !== hpSourceCard) return;
     if (!tooltipEl.contains(e.relatedTarget)) hpTimeout = setTimeout(hideHoverPanel, 120);
   });
@@ -517,22 +520,18 @@ function showHoverPanel(champ, cardEl) {
 }
 
 function positionHoverPanel(cardEl) {
-  // Attach to bottom of the image (not the full card which includes name text)
-  const img  = cardEl.querySelector('img');
-  const ref  = img ? img.getBoundingClientRect() : cardEl.getBoundingClientRect();
-  const pw   = tooltipEl.offsetWidth  || 230;
-  const ph   = tooltipEl.offsetHeight || 200;
-  // Strict left-align with the image edge, zero gap from image bottom
+  const img = cardEl.querySelector('img');
+  const ref = img ? img.getBoundingClientRect() : cardEl.getBoundingClientRect();
+  const pw  = tooltipEl.offsetWidth  || 230;
+
+  // Always show below the card
+  const top = ref.bottom;
+
+  // Left-align by default; if it overflows right, right-align to card's right edge
   let left = ref.left;
-  let top  = ref.bottom;
-  if (left + pw > window.innerWidth - 6) left = window.innerWidth - pw - 6;
+  if (left + pw > window.innerWidth - 6) left = ref.right - pw;
   if (left < 6) left = 6;
-  if (top + ph > window.innerHeight - 6) {
-    const topAbove = ref.top - ph;
-    top = topAbove >= 6 ? topAbove : ref.bottom;
-  }
-  if (top < 6) top = 6;
-  if (top + ph > window.innerHeight - 6) top = window.innerHeight - ph - 6;
+
   tooltipEl.style.left = left + 'px';
   tooltipEl.style.top  = top  + 'px';
 }
@@ -570,7 +569,9 @@ function renderHoverPanel(champId) {
   const data       = getEffectiveChampData(champId);
   const tags       = data.tags     || [];
   const counters   = data.counters || [];
-  const beCountered = getBeCounteredBy(champId); // dynamic, computed
+  // Hard rule: a champion cannot appear in both 克制 and 被克制
+  const countersSet = new Set(counters);
+  const beCountered = getBeCounteredBy(champId).filter(cc => !countersSet.has(cc.id));
   const displayName = champ.zhName ? `${champ.zhName} · ${champ.name}` : champ.name;
 
   // ── Tags section ──
@@ -658,7 +659,7 @@ function renderHoverPanel(champId) {
     <div class="hp-champ-header">${displayName}</div>
     <div class="hp-section">${tagsHtml}</div>
     <div class="hp-divider"></div>
-    <div class="hp-hint"><span class="hp-hint-label">阵容关键词推荐：</span><br>1.<span class="hp-kw">肉</span>（视野） 2.<span class="hp-kw">前期/节奏</span> 3.<span class="hp-kw">后期/大C射手</span> 4.<span class="hp-kw">增益</span> 5.<span class="hp-kw">收割/刺客</span> 6.<span class="hp-kw">控制</span>（越多越好）</div>
+    <div class="hp-hint"><span class="hp-hint-label">阵容关键词推荐：</span><br>1.<span class="hp-kw">肉</span>（视野） 2.<span class="hp-kw">前期/节奏</span> 3.<span class="hp-kw">后期/大C射手</span> 4.<span class="hp-kw">收割/刺客</span> 5. <span class="hp-kw">控制</span>（越多越好）</div>
     <div class="hp-divider"></div>
     <div class="hp-section">${ctrsHtml}</div>
     <div class="hp-divider"></div>
@@ -843,13 +844,22 @@ function hpNavigateToChamp(champId) {
   setTimeout(() => {
     const card = document.querySelector(`[data-champ-id="${champId}"]`);
     if (!card) { hpLocked = false; return; }
-    card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    card.scrollIntoView({ behavior: 'smooth', block: 'start' });
     const champ = ALL_CHAMPIONS.find(c => c.id === champId);
     if (!champ) { hpLocked = false; return; }
     setTimeout(() => {
       showHoverPanel(champ, card);
-      // Keep locked for 1s after showing, then release
-      hpLockTimer = setTimeout(() => { hpLocked = false; }, 1000);
+      // Ensure the hover panel is fully visible; if it overflows bottom, scroll down
+      requestAnimationFrame(() => {
+        const rect = tooltipEl.getBoundingClientRect();
+        const overflow = rect.bottom - (window.innerHeight - 10);
+        if (overflow > 0) {
+          const grid = card.closest('.champ-grid') || document.getElementById('add-grid');
+          if (grid) grid.scrollBy({ top: overflow + 10, behavior: 'smooth' });
+        }
+      });
+      // Keep locked for 2s after showing, then release
+      hpLockTimer = setTimeout(() => { hpLocked = false; }, 2000);
     }, 250);
   }, 50);
 }
@@ -1055,6 +1065,23 @@ document.addEventListener('click', e => {
     }
   }
 });
+
+// ===== BACK TO TOP BUTTON =====
+function scrollAddGridToTop() {
+  const grid = document.getElementById('add-grid');
+  if (grid) grid.scrollTo({ top: 0, behavior: 'smooth' });
+}
+(function initBackToTop() {
+  const grid = document.getElementById('add-grid');
+  const btn  = document.getElementById('back-to-top');
+  if (!grid || !btn) return;
+  const update = () => {
+    if (grid.scrollTop > 200) btn.classList.remove('is-hidden');
+    else btn.classList.add('is-hidden');
+  };
+  grid.addEventListener('scroll', update, { passive: true });
+  update();
+})();
 
 // ===== INIT =====
 initDataModeToggle();
