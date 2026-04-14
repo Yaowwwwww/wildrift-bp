@@ -43,6 +43,11 @@
              onkeydown="if(event.key==='Enter')createKeyword()">
       <button class="kw-create-btn" onclick="createKeyword()" data-i18n="btn_create">创建</button>
     </div>
+    <label class="kw-star-check">
+      <input type="checkbox" id="kw-create-starred">
+      <span class="kw-star-check-box">★</span>
+      <span data-i18n="kw_mark_starred">标记为星标</span>
+    </label>
   </div>
   <div class="search-wrap">
     <input

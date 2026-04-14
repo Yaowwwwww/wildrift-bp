@@ -21,6 +21,10 @@ const I18N = {
     my_pool: "My Champion Pool",
     filter_pool_only: "Pool only",
     filter_starred_only: "Starred only",
+    kw_mark_starred: "Mark as starred",
+    kw_star_toggle: "Toggle star",
+    kw_delete: "Delete",
+    kw_delete_confirm: "Delete this keyword from all champions?",
     tagline: "Craft your own BP codex, shaped by your understanding!",
     back_to_top: "Back to top",
     btn_back: "← Back",
@@ -101,6 +105,10 @@ const I18N = {
     my_pool: "我的英雄池",
     filter_pool_only: "英雄池",
     filter_starred_only: "星标",
+    kw_mark_starred: "标记为星标",
+    kw_star_toggle: "切换星标",
+    kw_delete: "删除",
+    kw_delete_confirm: "确定从所有英雄中删除这个词条吗？",
     tagline: "根据你的理解修改出属于自己的BP宝典！",
     back_to_top: "回到顶部",
     btn_back: "← 返回",
@@ -268,11 +276,12 @@ function toggleLanguage() {
 
 // ===== STATE =====
 let state = {
-  pool:       new Set(),  // champion ids in user's pool
-  junglers:   new Set(),  // champion ids marked as jungler
-  starred:    new Set(),  // champion ids pinned to front
-  champData:  {},         // { [id]: { tags: string[], counters: string[] } }
-  extraTags:  []          // user-created global keywords
+  pool:        new Set(),  // champion ids in user's pool
+  junglers:    new Set(),  // champion ids marked as jungler
+  starred:     new Set(),  // champion ids pinned to front
+  champData:   {},         // { [id]: { tags: string[], counters: string[] } }
+  extraTags:   [],         // user-created global keywords
+  starredTags: []          // keyword chips pinned as priority (union with PRIORITY_TAGS defaults)
 };
 
 let currentAddLane    = 'all';
@@ -377,7 +386,8 @@ function createEmptyState() {
     junglers: new Set(),
     starred: new Set(),
     champData: {},
-    extraTags: []
+    extraTags: [],
+    starredTags: []
   };
 }
 
@@ -463,6 +473,7 @@ function loadState() {
       state.starred    = new Set(parsed.starred   || []);
       state.champData  = normalizeStoredChampData(parsed.champData || {}, getDefaultChampData());
       state.extraTags  = parsed.extraTags  || [];
+      state.starredTags = parsed.starredTags || [];
     }
   } catch (e) { /* ignore */ }
 
@@ -477,11 +488,12 @@ function loadState() {
 
 function saveState() {
   localStorage.setItem(STATE_STORAGE_KEY, JSON.stringify({
-    pool:      [...state.pool],
-    junglers:  [...state.junglers],
-    starred:   [...state.starred],
-    champData: state.champData,
-    extraTags: state.extraTags || []
+    pool:        [...state.pool],
+    junglers:    [...state.junglers],
+    starred:     [...state.starred],
+    champData:   state.champData,
+    extraTags:   state.extraTags || [],
+    starredTags: state.starredTags || []
   }));
   if (window.WRSync && window.WRSync.schedulePush) window.WRSync.schedulePush();
 }
@@ -491,11 +503,12 @@ function saveState() {
 // personal state (Sets flattened to arrays) suitable for upsert.
 window.getSyncableState = function () {
   return {
-    pool:      [...state.pool],
-    junglers:  [...state.junglers],
-    starred:   [...state.starred],
-    champData: state.champData || {},
-    extraTags: state.extraTags || []
+    pool:        [...state.pool],
+    junglers:    [...state.junglers],
+    starred:     [...state.starred],
+    champData:   state.champData || {},
+    extraTags:   state.extraTags || [],
+    starredTags: state.starredTags || []
   };
 };
 
@@ -504,11 +517,12 @@ window.getSyncableState = function () {
 // saveState() it triggers doesn't echo back to the server.
 window.setStateFromSync = function (s) {
   if (!s) return;
-  state.pool      = new Set(s.pool      || []);
-  state.junglers  = new Set(s.junglers  || []);
-  state.starred   = new Set(s.starred   || []);
-  state.champData = s.champData || {};
-  state.extraTags = s.extraTags || [];
+  state.pool        = new Set(s.pool      || []);
+  state.junglers    = new Set(s.junglers  || []);
+  state.starred     = new Set(s.starred   || []);
+  state.champData   = s.champData || {};
+  state.extraTags   = s.extraTags || [];
+  state.starredTags = s.starredTags || [];
   saveState();
   rerenderCurrentView();
 };
@@ -600,10 +614,12 @@ function buildKeywordChips() {
   };
   container.appendChild(allBtn);
 
-  // Priority keywords — pinned at front (right after "All") and visually highlighted.
-  const PRIORITY_TAGS = ["控制", "肉", "打肉", "前期", "前中期", "前中期节奏", "中后期", "后期"];
-  const prioritySet = new Set(PRIORITY_TAGS);
-  const pinned = PRIORITY_TAGS.filter(tg => all.has(tg));
+  // Priority keywords — hardcoded defaults + user-starred tags, pinned + highlighted.
+  const DEFAULT_PRIORITY_TAGS = ["控制", "肉", "打肉", "前期", "前中期", "前中期节奏", "中后期", "后期"];
+  const userStarred = state.starredTags || [];
+  const effectivePriority = [...DEFAULT_PRIORITY_TAGS, ...userStarred.filter(t => !DEFAULT_PRIORITY_TAGS.includes(t))];
+  const prioritySet = new Set(effectivePriority);
+  const pinned = effectivePriority.filter(tg => all.has(tg));
   const rest   = [...all].filter(tg => !prioritySet.has(tg));
 
   [...pinned, ...rest].forEach(tag => {
@@ -612,7 +628,19 @@ function buildKeywordChips() {
     btn.className = 'kw-chip'
       + (isPinned ? ' kw-chip-priority' : '')
       + (activeKeywords.has(tag) ? ' active' : '');
-    btn.textContent = displayTag(tag);
+    btn.innerHTML = `
+      <span class="kw-chip-label">${displayTag(tag)}</span>
+      <span class="kw-chip-star" title="${t('kw_star_toggle')}">★</span>
+      <span class="kw-chip-x" title="${t('kw_delete')}">×</span>
+    `;
+    btn.querySelector('.kw-chip-star').onclick = (e) => {
+      e.stopPropagation();
+      toggleTagStarred(tag);
+    };
+    btn.querySelector('.kw-chip-x').onclick = (e) => {
+      e.stopPropagation();
+      deleteKeywordEverywhere(tag);
+    };
     btn.onclick = () => {
       if (activeKeywords.has(tag)) activeKeywords.delete(tag);
       else activeKeywords.add(tag);
@@ -651,14 +679,50 @@ function createKeyword() {
   const tag = inp.value.trim();
   if (!tag) return;
   if (!state.extraTags) state.extraTags = [];
-  if (!state.extraTags.includes(tag)) {
-    state.extraTags.push(tag);
-    saveState();
+  if (!state.extraTags.includes(tag)) state.extraTags.push(tag);
+
+  const starCheck = document.getElementById('kw-create-starred');
+  if (starCheck && starCheck.checked) {
+    if (!state.starredTags) state.starredTags = [];
+    if (!state.starredTags.includes(tag)) state.starredTags.push(tag);
   }
+  saveState();
+
   inp.value = '';
+  if (starCheck) starCheck.checked = false;
   kwPanelOpen = false;
   document.getElementById('kw-add-panel').classList.add('hidden');
   buildKeywordChips();
+}
+
+function toggleTagStarred(tag) {
+  if (!state.starredTags) state.starredTags = [];
+  const i = state.starredTags.indexOf(tag);
+  if (i >= 0) state.starredTags.splice(i, 1);
+  else state.starredTags.push(tag);
+  saveState();
+  buildKeywordChips();
+}
+
+function deleteKeywordEverywhere(tag) {
+  if (!confirm(t('kw_delete_confirm'))) return;
+  // Remove from user-created extra tags
+  if (state.extraTags) state.extraTags = state.extraTags.filter(t => t !== tag);
+  // Remove from starred tags
+  if (state.starredTags) state.starredTags = state.starredTags.filter(t => t !== tag);
+  // Remove from every champion's tag list (treat as full delete)
+  ALL_CHAMPIONS.forEach(c => {
+    const data = getEffectiveChampData(c.id);
+    if (data.tags && data.tags.includes(tag)) {
+      const override = ensureChampDataOverride(c.id);
+      override.tags = (override.tags || []).filter(t => t !== tag);
+    }
+  });
+  // If it was an active filter, remove it
+  if (activeKeywords.has(tag)) activeKeywords.delete(tag);
+  saveState();
+  buildKeywordChips();
+  renderAddGrid();
 }
 
 // ===== LANE TAB SWITCH (ADD SCREEN) =====

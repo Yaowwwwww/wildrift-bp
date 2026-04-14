@@ -1131,6 +1131,7 @@ input  { font-family: inherit; }
 }
 
 .kw-chip {
+  position: relative;
   background: transparent;
   border: 1px solid #3a3a3a;
   color: #ccc;
@@ -1139,6 +1140,62 @@ input  { font-family: inherit; }
   letter-spacing: 1.2px;
   cursor: pointer;
   transition: all 0.15s;
+}
+.kw-chip-label { display: inline-block; }
+.kw-chip-star,
+.kw-chip-x {
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  line-height: 1;
+  opacity: 0;
+  transition: opacity 0.15s ease, background 0.15s ease, color 0.15s ease, transform 0.15s ease;
+  pointer-events: none;
+  z-index: 2;
+  font-weight: 700;
+}
+.kw-chip-star {
+  top: -6px;
+  left: -6px;
+  border: 1.5px solid #f0e68c;
+  color: #f0e68c;
+  background: #111;
+}
+.kw-chip-x {
+  top: -6px;
+  right: -6px;
+  border: 1.5px solid #c55;
+  color: #e88;
+  background: #111;
+  font-size: 13px;
+}
+.kw-chip:hover .kw-chip-star,
+.kw-chip:hover .kw-chip-x {
+  opacity: 1;
+  pointer-events: auto;
+}
+.kw-chip-star:hover {
+  background: #f0e68c;
+  color: #1a1a1a;
+  transform: scale(1.15);
+}
+.kw-chip-x:hover {
+  background: #c55;
+  color: #fff;
+  transform: scale(1.15);
+}
+/* Already-starred chip: star icon filled */
+.kw-chip-priority .kw-chip-star {
+  background: #f0e68c;
+  color: #1a1a1a;
+}
+.kw-chip-priority .kw-chip-star:hover {
+  background: #fff3a0;
 }
 .kw-chip:hover  { border-color: #aaa; color: #fff; }
 .kw-chip.active {
@@ -1217,6 +1274,49 @@ input  { font-family: inherit; }
   font-family: inherit;
 }
 .kw-create-input::placeholder { color: #555; }
+
+/* "Mark as starred" checkbox in the create keyword panel */
+.kw-star-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  cursor: pointer;
+  user-select: none;
+  font-size: 0.82rem;
+  color: #bbb;
+  letter-spacing: 0.5px;
+}
+.kw-star-check input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+.kw-star-check-box {
+  width: 18px;
+  height: 18px;
+  box-sizing: border-box;
+  border: 1.5px solid #555;
+  background: transparent;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  color: transparent;
+  transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
+}
+.kw-star-check:hover .kw-star-check-box {
+  border-color: #f0e68c;
+}
+.kw-star-check input:checked + .kw-star-check-box {
+  border-color: #f0e68c;
+  background: #f0e68c;
+  color: #1a1a1a;
+}
+.kw-star-check input:checked ~ span:not(.kw-star-check-box) {
+  color: #f0e68c;
+  font-weight: 600;
+}
 
 .kw-create-btn {
   background: transparent;
