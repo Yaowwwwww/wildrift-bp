@@ -750,6 +750,9 @@ function buildCard(champ, mode) {
   const imgWrap = document.createElement('div');
   imgWrap.className = 'champ-img-wrap';
   if (ZOOM_2X_CHAMPS.has(champ.id)) imgWrap.classList.add('zoom-2x');
+  if (typeof CHAMPION_ICON_OVERRIDES !== 'undefined' && CHAMPION_ICON_OVERRIDES[champ.id]) {
+    imgWrap.classList.add('has-custom-art');
+  }
   const xform = buildChampImgTransform(champ.id);
   if (xform) img.style.transform = xform;
   imgWrap.appendChild(img);
