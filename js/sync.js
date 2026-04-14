@@ -511,12 +511,14 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
       || host === '0.0.0.0'
       || host.endsWith('.local');
 
-    // Local / no-config / rpc-failure fallback: accumulate in localStorage so
-    // the counter only ever grows, no matter how many refreshes.
-    const showDummy = () => {
+    // Shared display logic: combines dummy base + real DB count + local
+    // accumulator. Refresh always adds +1. Monotonic — display is
+    // max(previous, 1000 + real_db_count) then + 1.
+    const proceed = (realCount) => {
       let current = 0;
       try { current = parseInt(localStorage.getItem(DUMMY_KEY) || '0', 10) || 0; } catch (e) {}
-      if (current < VISIT_BASE) current = VISIT_BASE;
+      const baseline = VISIT_BASE + (realCount || 0);
+      if (current < baseline) current = baseline;
       current += 1; // +1 per refresh
       try { localStorage.setItem(DUMMY_KEY, String(current)); } catch (e) {}
       renderVisitCount(current, false);
@@ -524,33 +526,35 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
     };
 
     if (isLocal || !client) {
-      showDummy();
+      proceed(0);
       // Local-only: also query the real DB total so you can see it during
-      // development even though the displayed counter uses dummy data.
+      // development even though the displayed counter uses a blended total.
       if (client) showRealCountInFooter();
       return;
     }
 
-    // Real mode: RPC increments DB by 1 and returns new total.
+    // Production: bump real DB by 1, then blend into the displayed counter.
     client.rpc('increment_visits').then(({ data, error }) => {
       if (error || typeof data !== 'number') {
-        console.warn('[visits] rpc failed, using dummy:', error);
-        showDummy();
+        console.warn('[visits] rpc failed, using dummy baseline:', error);
+        proceed(0);
         return;
       }
-      renderVisitCount(data, false);
-      startTicking();
-    }).catch(() => { showDummy(); });
+      proceed(data);
+    }).catch(() => { proceed(0); });
 
-    // Realtime: when another visitor bumps the counter, nudge our displayed total too.
+    // Realtime: when another visitor bumps the DB counter, raise our baseline.
     try {
       client.channel('site_stats_live')
         .on('postgres_changes',
             { event: 'UPDATE', schema: 'public', table: 'site_stats', filter: 'id=eq.1' },
             (payload) => {
               const next = payload.new && payload.new.total_visits;
-              if (typeof next === 'number' && next > displayedVisits) {
-                renderVisitCount(next, true);
+              if (typeof next !== 'number') return;
+              const rebaselined = VISIT_BASE + next;
+              if (rebaselined > displayedVisits) {
+                renderVisitCount(rebaselined, true);
+                try { localStorage.setItem(DUMMY_KEY, String(rebaselined)); } catch (e) {}
               }
             })
         .subscribe();
