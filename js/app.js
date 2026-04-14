@@ -4,7 +4,8 @@ let currentLang = 'en'; // default
 
 const I18N = {
   en: {
-    page_title: "Wild Rift Picking System",
+    page_title: "Wild Rift BP System",
+    title_header: 'WILDRIFT<span class="title-sep"></span>BP SYSTEM',
     title_desc: "Click champions to add to your pool, check traits to patch team gaps, use counters in BP to avoid being pressured / to pressure opponents",
     title_version: "Patch: 7.1a &nbsp; Latest Champion: K'Sante &nbsp; Author: 长风，梨花",
     lane_all: "All",
@@ -56,7 +57,8 @@ const I18N = {
     unpin_title: "Unpin",
   },
   cn: {
-    page_title: "LOL手游英雄选择系统",
+    page_title: "激斗峡谷 BP 系统",
+    title_header: '激斗峡谷<span class="title-sep"></span>BP 系统',
     title_desc: "点击英雄可以加入自己的英雄池，查看特性来补阵容缺陷，克制关系BP避免对位压制/实现压制",
     title_version: "游戏版本：7.1a &nbsp; 最新英雄：奎桑提 &nbsp; Author: 长风, 梨花",
     lane_all: "全部",

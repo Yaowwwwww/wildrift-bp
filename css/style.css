@@ -1261,7 +1261,10 @@ body.lang-en .champ-card.hp-active .champ-name .en { color: #f5f0a0; }
     text-overflow: ellipsis;
   }
   .title-desc {
-    display: none;
+    font-size: 0.66rem;
+    letter-spacing: 0.3px;
+    line-height: 1.4;
+    margin-top: 3px;
   }
   .header-right {
     margin-left: 0;
