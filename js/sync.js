@@ -469,11 +469,21 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
   // and renders the total into #visit-count.
   // ───────────────────────────────────────────────────────────
   // Pseudo-dynamic visit counter:
-  //   displayed = 1000 + real_total + random(-100, 100)
-  //   On user actions (lane switch, screen change), bump by 1/2/3/5
-  //   and play a floating "+N" animation next to the counter.
+  //   Real mode: RPC increments DB by +1 per refresh, returns new total.
+  //   Dummy mode: starts at 1000, +1 per refresh, persists in localStorage.
+  //   Every 1..3 seconds the counter ticks up by 1..3 with a floating "+N"
+  //   animation to feel alive. Monotonic — never goes backwards.
   const VISIT_BASE = 1000;
+  const DUMMY_KEY  = 'wr-bp-dummy-visits';
   let displayedVisits = 0;
+  let tickTimer = null;
+
+  function tickDelta() {
+    return Math.floor(Math.random() * 9) + 1; // 1..9
+  }
+  function nextTickDelay() {
+    return 1000 + Math.floor(Math.random() * 4001); // 1000..5000ms
+  }
 
   function renderVisitCount(n, animate) {
     const el = document.getElementById('visit-count');
@@ -494,33 +504,80 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
   }
 
   function trackVisit() {
-    if (!client) return;
+    const host = window.location.hostname;
+    const isLocal = window.location.protocol === 'file:'
+      || host === 'localhost'
+      || host === '127.0.0.1'
+      || host === '0.0.0.0'
+      || host.endsWith('.local');
 
-    // Bump real counter once on page load, then display with pseudo-dynamic offset
+    // Local / no-config / rpc-failure fallback: accumulate in localStorage so
+    // the counter only ever grows, no matter how many refreshes.
+    const showDummy = () => {
+      let current = 0;
+      try { current = parseInt(localStorage.getItem(DUMMY_KEY) || '0', 10) || 0; } catch (e) {}
+      if (current < VISIT_BASE) current = VISIT_BASE;
+      current += 1; // +1 per refresh
+      try { localStorage.setItem(DUMMY_KEY, String(current)); } catch (e) {}
+      renderVisitCount(current, false);
+      startTicking();
+    };
+
+    if (isLocal || !client) {
+      showDummy();
+      return;
+    }
+
+    // Real mode: RPC increments DB by 1 and returns new total.
     client.rpc('increment_visits').then(({ data, error }) => {
-      if (error) { console.warn('[visits] rpc error:', error); return; }
-      const real = typeof data === 'number' ? data : 0;
-      const offset = Math.floor(Math.random() * 201) - 100; // -100..+100
-      renderVisitCount(VISIT_BASE + real + offset, false);
-    }).catch(() => {});
+      if (error || typeof data !== 'number') {
+        console.warn('[visits] rpc failed, using dummy:', error);
+        showDummy();
+        return;
+      }
+      renderVisitCount(data, false);
+      startTicking();
+    }).catch(() => { showDummy(); });
 
     // Realtime: when another visitor bumps the counter, nudge our displayed total too.
-    client.channel('site_stats_live')
-      .on('postgres_changes',
-          { event: 'UPDATE', schema: 'public', table: 'site_stats', filter: 'id=eq.1' },
-          () => {
-            // Someone else just incremented — add a small pseudo bump with animation
-            window.bumpVisitCount && window.bumpVisitCount();
-          })
-      .subscribe();
+    try {
+      client.channel('site_stats_live')
+        .on('postgres_changes',
+            { event: 'UPDATE', schema: 'public', table: 'site_stats', filter: 'id=eq.1' },
+            (payload) => {
+              const next = payload.new && payload.new.total_visits;
+              if (typeof next === 'number' && next > displayedVisits) {
+                renderVisitCount(next, true);
+              }
+            })
+        .subscribe();
+    } catch (e) { /* ignore realtime setup errors */ }
   }
 
-  // Public: fired by app.js on UI state changes (lane switch, screen change, etc.)
-  window.bumpVisitCount = function () {
+  // Start the "visitor came in" ticker. Uses recursive setTimeout so each
+  // tick fires after a random 1..3s delay, giving a more organic cadence
+  // than a fixed setInterval.
+  function startTicking() {
+    if (tickTimer) return; // already running
+    const scheduleNext = () => {
+      tickTimer = setTimeout(() => {
+        if (!document.hidden) tickVisitCount(tickDelta());
+        scheduleNext();
+      }, nextTickDelay());
+    };
+    scheduleNext();
+  }
+
+  function tickVisitCount(delta) {
     if (!displayedVisits) return;
-    const choices = [1, 2, 3, 5];
-    const n = choices[Math.floor(Math.random() * choices.length)];
-    renderVisitCount(displayedVisits + n, true);
+    const next = displayedVisits + delta;
+    renderVisitCount(next, true);
+    try { localStorage.setItem(DUMMY_KEY, String(next)); } catch (e) {}
+  }
+
+  // Public: fired by app.js on UI state changes (lane switch, screen change).
+  window.bumpVisitCount = function () {
+    tickVisitCount(tickDelta());
   };
 
   // ───────────────────────────────────────────────────────────

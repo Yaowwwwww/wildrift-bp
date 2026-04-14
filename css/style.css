@@ -1001,6 +1001,7 @@ input  { font-family: inherit; }
 }
 .footer-visits {
   position: relative;
+  z-index: 10;
 }
 .footer-visits #visit-count {
   color: #f0e68c;
@@ -1011,13 +1012,16 @@ input  { font-family: inherit; }
 .visit-bubble {
   position: absolute;
   top: -14px;
-  right: -28px;
+  right: -30px;
   color: #f0e68c;
   font-size: 0.78rem;
   font-weight: 700;
   letter-spacing: 0;
   pointer-events: none;
-  text-shadow: 0 0 8px rgba(240, 230, 140, 0.6);
+  text-shadow: 0 0 8px rgba(240, 230, 140, 0.6),
+               0 0 2px rgba(0, 0, 0, 0.9);
+  z-index: 100;
+  white-space: nowrap;
   animation: visit-bubble-fly 1.2s cubic-bezier(0.25, 1, 0.5, 1) forwards;
 }
 @keyframes visit-bubble-fly {
