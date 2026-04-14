@@ -1205,3 +1205,162 @@ body.lang-en .champ-card:hover .champ-name .zh { color: #aaa; }
 body.lang-en .champ-card:hover .champ-name .en { color: #fff; }
 body.lang-en .champ-card.hp-active .champ-name .zh { color: #b8a840; }
 body.lang-en .champ-card.hp-active .champ-name .en { color: #f5f0a0; }
+
+/* ===== RESPONSIVE / MOBILE LAYOUT ===== */
+
+/* Tablet / narrow laptop: soften sizes */
+@media (max-width: 900px) {
+  .screen-header {
+    gap: 12px;
+    padding: 14px 14px;
+  }
+  .nav-logo {
+    width: 110px;
+    height: 72px;
+  }
+  #add-screen .screen-header h2 {
+    font-size: 1.1rem;
+    letter-spacing: 3px;
+  }
+  .title-desc {
+    font-size: 0.72rem;
+  }
+  .export-btn {
+    font-size: 0.78rem;
+    padding: 7px 14px;
+    margin-right: 10px;
+  }
+  .lang-toggle {
+    font-size: 0.82rem;
+    gap: 8px;
+  }
+}
+
+/* Mobile: stack header into two rows, shrink aggressively */
+@media (max-width: 640px) {
+  .screen-header {
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 10px 12px;
+    row-gap: 8px;
+  }
+  .nav-logo {
+    width: 72px;
+    height: 48px;
+  }
+  .title-box {
+    flex: 1 1 0;
+    min-width: 0;
+    padding: 4px 10px;
+  }
+  #add-screen .screen-header h2 {
+    font-size: 0.82rem;
+    letter-spacing: 1.5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .title-desc {
+    display: none;
+  }
+  .header-right {
+    margin-left: 0;
+    width: 100%;
+    justify-content: flex-end;
+    gap: 8px;
+  }
+  .export-btn {
+    font-size: 0.72rem;
+    padding: 6px 10px;
+    margin-right: 0;
+    letter-spacing: 0.8px;
+  }
+  .lang-toggle {
+    font-size: 0.78rem;
+    gap: 6px;
+    padding: 4px 2px;
+  }
+  .lang-track {
+    width: 48px;
+    height: 24px;
+  }
+  .lang-knob {
+    width: 20px;
+    height: 20px;
+    font-size: 14px;
+  }
+  body.lang-cn .lang-knob { transform: translateX(24px); }
+
+  .lane-tabs {
+    padding: 8px 10px 0;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .lane-tabs::-webkit-scrollbar { display: none; }
+  .lane-tab {
+    padding: 7px 11px;
+    font-size: 0.78rem;
+    letter-spacing: 1px;
+    flex-shrink: 0;
+  }
+
+  .keyword-chips {
+    padding: 8px 12px 0;
+  }
+  .search-wrap {
+    padding: 0 12px;
+  }
+  .tagline-wrap {
+    margin: 6px 12px 0;
+  }
+  .tagline-text {
+    font-size: 0.72rem;
+    letter-spacing: 0.4px;
+    white-space: normal;
+    text-align: center;
+  }
+  .tagline-line { display: none; }
+  .champ-grid {
+    padding: 10px 12px 500px;
+    gap: 8px;
+    grid-template-columns: repeat(auto-fill, minmax(72px, 1fr));
+  }
+
+  .site-footer {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+    padding: 12px 14px;
+  }
+  .site-footer .title-version,
+  .site-footer .footer-copyright {
+    font-size: 0.7rem;
+    letter-spacing: 0.8px;
+  }
+  .title-box::before,
+  .title-box::after { display: none; }
+}
+
+/* Very narrow phones: tighten further */
+@media (max-width: 400px) {
+  .nav-logo {
+    width: 56px;
+    height: 38px;
+  }
+  #add-screen .screen-header h2 {
+    font-size: 0.72rem;
+    letter-spacing: 1px;
+  }
+  .export-btn {
+    font-size: 0.66rem;
+    padding: 5px 8px;
+  }
+  .lane-tab {
+    padding: 6px 9px;
+    font-size: 0.72rem;
+  }
+  .champ-grid {
+    grid-template-columns: repeat(auto-fill, minmax(68px, 1fr));
+  }
+}
