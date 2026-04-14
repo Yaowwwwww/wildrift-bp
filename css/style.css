@@ -199,7 +199,7 @@ input  { font-family: inherit; }
   height: 78px;
   overflow: hidden;
   display: block;
-  border: 1px solid #333;
+  border: 1px solid #666;
   box-sizing: border-box;
   transition: border-color 0.15s;
   position: relative;
@@ -247,7 +247,7 @@ input  { font-family: inherit; }
 .champ-card:hover .champ-name { color: #ddd; }
 
 /* Pool states */
-.champ-card.is-in-pool .champ-img-wrap   { border-color: #444; }
+.champ-card.is-in-pool .champ-img-wrap   { border-color: #777; }
 .champ-card.is-in-pool .champ-name { color: #888; }
 .champ-card.is-in-pool:hover .champ-img-wrap   { border-color: #fff; }
 
