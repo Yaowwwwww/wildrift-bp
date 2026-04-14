@@ -68,8 +68,15 @@ input  { font-family: inherit; }
   flex-shrink: 0;
 }
 
-.local-data-toggle {
+.header-right {
   margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.local-data-toggle {
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -236,6 +243,72 @@ input  { font-family: inherit; }
   justify-content: center;
   font-weight: 700;
   pointer-events: none;
+}
+
+/* Hollow checkbox — shown on hover for unselected champions */
+.card-badge-hollow {
+  position: absolute;
+  top: 2px;
+  right: 10px;
+  width: 13px;
+  height: 13px;
+  box-sizing: border-box;
+  background: transparent;
+  border: 1.5px solid #ddd;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+  pointer-events: none;
+  box-shadow: 0 0 3px rgba(0, 0, 0, 0.5);
+}
+.champ-card:hover .card-badge-hollow {
+  opacity: 0.9;
+}
+
+/* Star (pin to front) button — top-left corner, mirrors the hollow checkbox */
+.card-star {
+  position: absolute;
+  top: 2px;
+  left: 10px;
+  width: 13px;
+  height: 13px;
+  box-sizing: border-box;
+  padding: 0;
+  background: transparent;
+  border: 1.5px solid #ddd;
+  color: #ddd;
+  font-size: 9px;
+  line-height: 1;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.15s, transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.15s, border-color 0.15s, color 0.15s;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform-origin: center;
+  box-shadow: 0 0 3px rgba(0, 0, 0, 0.5);
+}
+.champ-card:hover .card-star { opacity: 0.9; }
+.card-star:hover {
+  opacity: 1;
+  transform: scale(1.35);
+  border-color: #f0e68c;
+  color: #f0e68c;
+}
+.card-star.is-starred {
+  opacity: 1;
+  background: #f0e68c;
+  border-color: #f0e68c;
+  color: #1a1a1a;
+}
+.card-star.is-starred:hover {
+  transform: scale(1.2);
+  background: #fff3a0;
+  border-color: #fff3a0;
+}
+.card-star:active {
+  transform: scale(0.9);
+  transition: transform 0.08s ease;
 }
 
 /* ===== INTERACTIVE HOVER PANEL ===== */
@@ -985,3 +1058,77 @@ input  { font-family: inherit; }
 
 /* ===== VIEW TOGGLE ===== */
 .hidden { display: none !important; }
+
+/* ===== LANGUAGE TOGGLE ===== */
+.lang-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: transparent;
+  border: none;
+  padding: 6px 4px;
+  cursor: pointer;
+  user-select: none;
+  font-size: 0.72rem;
+  letter-spacing: 1px;
+  font-weight: 600;
+  color: #666;
+  transition: color 0.2s;
+  flex-shrink: 0;
+}
+.lang-toggle:hover { color: #aaa; }
+.lang-label { transition: color 0.2s; }
+body.lang-en .lang-toggle .lang-label-en,
+body.lang-cn .lang-toggle .lang-label-cn {
+  color: #f0e68c;
+}
+.lang-track {
+  position: relative;
+  width: 46px;
+  height: 22px;
+  background: #111;
+  border: 1px solid #333;
+  border-radius: 999px;
+  transition: border-color 0.2s, background 0.2s;
+  display: inline-block;
+}
+.lang-toggle:hover .lang-track {
+  border-color: #f0e68c;
+  background: #1a1a1a;
+}
+.lang-knob {
+  position: absolute;
+  top: 1px;
+  left: 1px;
+  width: 18px;
+  height: 18px;
+  background: #fff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  line-height: 1;
+  overflow: hidden;
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+}
+body.lang-cn .lang-knob { transform: translateX(24px); }
+.lang-flag { display: none; }
+body.lang-en .lang-flag-en { display: inline; }
+body.lang-cn .lang-flag-cn { display: inline; }
+
+/* ===== EN MODE: swap champion name sizes (English primary) ===== */
+body.lang-en .champ-card .champ-name { flex-direction: column-reverse; }
+body.lang-en .champ-card .champ-name .zh {
+  font-size: 0.55rem;
+  color: #888;
+}
+body.lang-en .champ-card .champ-name .en {
+  font-size: 0.72rem;
+  color: #eee;
+}
+body.lang-en .champ-card:hover .champ-name .zh { color: #aaa; }
+body.lang-en .champ-card:hover .champ-name .en { color: #fff; }
+body.lang-en .champ-card.hp-active .champ-name .zh { color: #b8a840; }
+body.lang-en .champ-card.hp-active .champ-name .en { color: #f5f0a0; }

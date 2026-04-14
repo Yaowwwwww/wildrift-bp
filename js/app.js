@@ -1,7 +1,215 @@
+// ===== I18N =====
+const LANG_STORAGE_KEY = 'wr-bp-lang';
+let currentLang = 'en'; // default
+
+const I18N = {
+  en: {
+    page_title: "Wild Rift Picking System",
+    title_desc: "Click champions to add to your pool, check traits to patch team gaps, use counters in BP to avoid being pressured / to pressure opponents",
+    title_version: "Patch: 7.1a &nbsp; Latest Champion: K'Sante &nbsp; Author: 长风入萧曲悠扬，梨花梦中烟消散",
+    local_dev_only: "Local dev only",
+    use_personal_data: "Use personal data",
+    lane_all: "All",
+    lane_baron: "Baron",
+    lane_jungle: "Jungle",
+    lane_mid: "Mid",
+    lane_adc: "ADC",
+    lane_support: "Support",
+    kw_create_ph: "Enter new tag name...",
+    btn_create: "Create",
+    search_ph: "Search champion / tag...",
+    clear_search: "Clear search",
+    my_pool: "My Champion Pool",
+    back_to_top: "Back to top",
+    btn_back: "← Back",
+    pool_search_ph: "Search champion / tag (e.g. tank, counter, carry)...",
+    tags_label: "Tags",
+    add_tag_ph: "Add tag...",
+    btn_add: "Add",
+    counters_label: "Counters (this champ counters these enemies)",
+    counter_search_ph: "Search countered champion...",
+    jungle_mark_label: "Jungle mark",
+    mark_as_jungler: "Mark as jungler",
+    remove_from_pool: "Remove from pool",
+    pool_empty: "Pool is empty — click a champion to add",
+    kw_all: "All",
+    hp_keywords: "Keywords",
+    hp_no_tags: "No tags",
+    hp_available: "Available",
+    hp_all_tags_added: "All tags added",
+    hp_counters: "Counters",
+    hp_no_counters: "No counters",
+    hp_search_champ: "Search champion...",
+    hp_be_countered: "Countered By",
+    hp_no_be_countered: "None",
+    hp_hint_comp_label: "Team Comp Keywords:",
+    hp_hint_comp: '1.<span class="hp-kw">Tank</span> (Vision) 2.<span class="hp-kw">Early/Tempo</span> 3.<span class="hp-kw">Late/Hypercarry ADC</span> 4.<span class="hp-kw">Reaper/Assassin</span> 5. <span class="hp-kw">Control</span> (more the better)',
+    hp_hint_chain_label: "Counter Chain (→ means counters):",
+    hp_hint_chain: '<span class="hp-kw">Assassin/Control/Burst</span> → <span class="hp-kw">Hypercarry ADC</span><br><span class="hp-kw">Hypercarry ADC</span> → <span class="hp-kw">Tank</span><br><span class="hp-kw">Tank</span> → <span class="hp-kw">Assassin/Burst</span>',
+    no_match: "No matching champions",
+    delete: "Delete",
+    remove: "Remove",
+    confirm_remove: (name) => `Remove ${name} from pool?`,
+    pin_title: "Pin to front",
+    unpin_title: "Unpin",
+  },
+  cn: {
+    page_title: "LOL手游英雄选择系统",
+    title_desc: "点击英雄可以加入自己的英雄池，查看特性来补阵容缺陷，克制关系BP避免对位压制/实现压制",
+    title_version: "游戏版本：7.1a &nbsp; 最新英雄：奎桑提 &nbsp; Author: 长风, 梨花",
+    local_dev_only: "仅本地开发环境可见",
+    use_personal_data: "使用个人数据",
+    lane_all: "全部",
+    lane_baron: "上单",
+    lane_jungle: "打野",
+    lane_mid: "中单",
+    lane_adc: "射手",
+    lane_support: "辅助",
+    kw_create_ph: "输入新词条名称...",
+    btn_create: "创建",
+    search_ph: "搜索英雄 / 词条...",
+    clear_search: "清除搜索",
+    my_pool: "我的英雄池",
+    back_to_top: "回到顶部",
+    btn_back: "← 返回",
+    pool_search_ph: "搜索英雄 / 词条（如：肉、针对、收割）...",
+    tags_label: "词条 · Tags",
+    add_tag_ph: "添加词条...",
+    btn_add: "添加",
+    counters_label: "克制英雄（此英雄克制以下敌方）",
+    counter_search_ph: "搜索被克制的英雄...",
+    jungle_mark_label: "打野标记",
+    mark_as_jungler: "标记为打野",
+    remove_from_pool: "从英雄池移除",
+    pool_empty: "英雄池为空 — 点击「加入新英雄」添加",
+    kw_all: "全部",
+    hp_keywords: "关键词",
+    hp_no_tags: "暂无词条",
+    hp_available: "可选",
+    hp_all_tags_added: "所有词条已添加",
+    hp_counters: "克制",
+    hp_no_counters: "暂无克制记录",
+    hp_search_champ: "搜索英雄...",
+    hp_be_countered: "被克制",
+    hp_no_be_countered: "暂无被克制记录",
+    hp_hint_comp_label: "阵容关键词推荐：",
+    hp_hint_comp: '1.<span class="hp-kw">肉</span>（视野） 2.<span class="hp-kw">前期/节奏</span> 3.<span class="hp-kw">后期/大C射手</span> 4.<span class="hp-kw">收割/刺客</span> 5. <span class="hp-kw">控制</span>（越多越好）',
+    hp_hint_chain_label: "通用克制链（→表示克制）：",
+    hp_hint_chain: '<span class="hp-kw">刺客/控制/爆发</span> → <span class="hp-kw">后期大C射手</span><br><span class="hp-kw">后期大C射手</span> → <span class="hp-kw">肉</span><br><span class="hp-kw">肉</span> → <span class="hp-kw">刺客/爆发</span>',
+    no_match: "无匹配英雄",
+    delete: "删除",
+    remove: "移除",
+    confirm_remove: (name) => `将 ${name} 从英雄池移除?`,
+    pin_title: "置顶",
+    unpin_title: "取消置顶",
+  },
+};
+
+function t(key, ...args) {
+  const entry = (I18N[currentLang] && I18N[currentLang][key]) ?? (I18N.en[key] ?? key);
+  return typeof entry === 'function' ? entry(...args) : entry;
+}
+
+// Format a champion's display name based on current language
+function displayChampName(c) {
+  if (!c) return '';
+  if (currentLang === 'en') return c.name || c.zhName || c.id;
+  return c.zhName || c.name || c.id;
+}
+
+// ── Default tag translations (stored tags remain in Chinese, translate on display)
+const TAG_MAP_EN = {
+  "控制": "Control",
+  "爆发": "Burst",
+  "前期": "Early",
+  "硬辅": "Hard Support",
+  "开团": "Engage",
+  "前中期节奏": "Early-Mid Tempo",
+  "大C射手": "Hypercarry ADC",
+  "风筝": "Kite",
+  "刺客": "Assassin",
+  "节奏": "Tempo",
+  "单带": "Split Push",
+  "后期": "Late",
+  "破甲": "Armor Shred",
+  "战士": "Fighter",
+  "打肉": "Anti-Tank",
+  "灵活保命": "Survivability",
+  "中后期": "Mid-Late",
+  "大后期": "Super Late",
+  "增益": "Enchanter",
+  "消耗pole": "Poke",
+  "收割": "Reaper",
+  "技能射手": "Skillshot ADC",
+  "针对": "Pick",
+  "poke消耗": "Poke",
+  "消耗": "Harass",
+  "支援": "Roam",
+  "肉": "Tank",
+  "全期": "All-Phase",
+  "展示": "Execute",
+};
+
+function displayTag(tag) {
+  if (currentLang === 'en' && TAG_MAP_EN[tag]) return TAG_MAP_EN[tag];
+  return tag;
+}
+
+// Match a tag against a query in either language
+function tagMatchesQuery(tag, query) {
+  if (!query) return true;
+  if (tag.toLowerCase().includes(query)) return true;
+  const en = TAG_MAP_EN[tag];
+  if (en && en.toLowerCase().includes(query)) return true;
+  return false;
+}
+
+function applyI18n() {
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    el.innerHTML = t(key);
+  });
+  document.querySelectorAll('[data-i18n-ph]').forEach(el => {
+    el.setAttribute('placeholder', t(el.getAttribute('data-i18n-ph')));
+  });
+  document.querySelectorAll('[data-i18n-title]').forEach(el => {
+    el.setAttribute('title', t(el.getAttribute('data-i18n-title')));
+  });
+  document.title = t('page_title');
+  document.documentElement.setAttribute('lang', currentLang === 'en' ? 'en' : 'zh');
+}
+
+function setLanguage(lang) {
+  if (lang !== 'en' && lang !== 'cn') lang = 'en';
+  currentLang = lang;
+  try { localStorage.setItem(LANG_STORAGE_KEY, lang); } catch (e) {}
+  document.body.classList.toggle('lang-en', lang === 'en');
+  document.body.classList.toggle('lang-cn', lang === 'cn');
+  applyI18n();
+  // Re-render dynamic UI that contains i18n strings
+  if (typeof buildKeywordChips === 'function') buildKeywordChips();
+  if (typeof renderAddGrid === 'function') renderAddGrid();
+  if (typeof currentCardPanelId !== 'undefined' && currentCardPanelId) {
+    if (typeof renderHoverPanel === 'function') renderHoverPanel(currentCardPanelId);
+  }
+}
+
+function toggleLanguage() {
+  setLanguage(currentLang === 'en' ? 'cn' : 'en');
+}
+
+(function initLanguage() {
+  let saved = null;
+  try { saved = localStorage.getItem(LANG_STORAGE_KEY); } catch (e) {}
+  currentLang = (saved === 'cn') ? 'cn' : 'en';
+  document.body.classList.add(currentLang === 'en' ? 'lang-en' : 'lang-cn');
+})();
+
 // ===== STATE =====
 let state = {
   pool:       new Set(),  // champion ids in user's pool
   junglers:   new Set(),  // champion ids marked as jungler
+  starred:    new Set(),  // champion ids pinned to front
   champData:  {},         // { [id]: { tags: string[], counters: string[] } }
   extraTags:  []          // user-created global keywords
 };
@@ -85,6 +293,7 @@ function createEmptyState() {
   return {
     pool: new Set(),
     junglers: new Set(),
+    starred: new Set(),
     champData: {},
     extraTags: []
   };
@@ -186,6 +395,7 @@ function loadState() {
       const parsed = JSON.parse(raw);
       state.pool       = new Set(parsed.pool      || []);
       state.junglers   = new Set(parsed.junglers  || []);
+      state.starred    = new Set(parsed.starred   || []);
       state.champData  = normalizeStoredChampData(parsed.champData || {}, getBaseChampData());
       state.extraTags  = parsed.extraTags  || [];
     }
@@ -204,6 +414,7 @@ function saveState() {
   localStorage.setItem(getStateStorageKey(), JSON.stringify({
     pool:      [...state.pool],
     junglers:  [...state.junglers],
+    starred:   [...state.starred],
     champData: state.champData,
     extraTags: state.extraTags || []
   }));
@@ -229,7 +440,7 @@ function champMatchesQuery(c, query) {
   if (c.id.toLowerCase().includes(query))   return true;
   if (c.zhName && c.zhName.includes(query)) return true;
   const tags = getEffectiveChampData(c.id).tags || [];
-  return tags.some(t => t.includes(query));
+  return tags.some(tg => tagMatchesQuery(tg, query));
 }
 
 // ===== RENDER POOL GRID =====
@@ -245,13 +456,16 @@ function renderPoolGrid() {
 
   grid.innerHTML = '';
   if (champs.length === 0) {
-    grid.innerHTML = '<p style="color:#2a2a2a;padding:24px;grid-column:1/-1;">英雄池为空 — 点击「加入新英雄」添加</p>';
+    grid.innerHTML = `<p style="color:#2a2a2a;padding:24px;grid-column:1/-1;">${t('pool_empty')}</p>`;
     return;
   }
 
-  // Junglers on top
-  const junglers    = champs.filter(c =>  state.junglers.has(c.id));
-  const nonJunglers = champs.filter(c => !state.junglers.has(c.id));
+  // Starred first, then junglers, then others
+  const starred     = champs.filter(c =>  state.starred.has(c.id));
+  const rest        = champs.filter(c => !state.starred.has(c.id));
+  const junglers    = rest.filter(c =>  state.junglers.has(c.id));
+  const nonJunglers = rest.filter(c => !state.junglers.has(c.id));
+  starred.forEach(c     => grid.appendChild(buildCard(c, 'pool')));
   junglers.forEach(c    => grid.appendChild(buildCard(c, 'pool')));
   nonJunglers.forEach(c => grid.appendChild(buildCard(c, 'pool')));
 }
@@ -266,10 +480,10 @@ function buildKeywordChips() {
   if (!container) return;
   container.innerHTML = '';
 
-  // "全部" reset chip
+  // "All" reset chip
   const allBtn = document.createElement('button');
   allBtn.className = 'kw-chip kw-chip-all' + (!activeKeyword ? ' active' : '');
-  allBtn.textContent = '全部';
+  allBtn.textContent = t('kw_all');
   allBtn.onclick = () => {
     activeKeyword = null;
     updateClearBtn();
@@ -281,7 +495,7 @@ function buildKeywordChips() {
   [...all].forEach(tag => {
     const btn = document.createElement('button');
     btn.className = 'kw-chip' + (activeKeyword === tag ? ' active' : '');
-    btn.textContent = tag;
+    btn.textContent = displayTag(tag);
     btn.onclick = () => {
       activeKeyword = (activeKeyword === tag) ? null : tag;
       updateClearBtn();
@@ -385,14 +599,16 @@ function renderAddGrid() {
     champs = champs.filter(c => champMatchesQuery(c, query));
   }
 
-  // Order: selected junglers → selected non-junglers → unselected
-  const selJungle    = champs.filter(c =>  state.pool.has(c.id) &&  state.junglers.has(c.id));
-  const selNonJungle = champs.filter(c =>  state.pool.has(c.id) && !state.junglers.has(c.id));
+  // Order: starred → selected junglers → selected non-junglers → unselected
+  const selStarred   = champs.filter(c =>  state.pool.has(c.id) &&  state.starred.has(c.id));
+  const selJungle    = champs.filter(c =>  state.pool.has(c.id) && !state.starred.has(c.id) &&  state.junglers.has(c.id));
+  const selNonJungle = champs.filter(c =>  state.pool.has(c.id) && !state.starred.has(c.id) && !state.junglers.has(c.id));
   const unselected   = champs.filter(c => !state.pool.has(c.id));
 
-  label.classList.toggle('hidden', selJungle.length === 0 && selNonJungle.length === 0);
+  label.classList.toggle('hidden', selStarred.length === 0 && selJungle.length === 0 && selNonJungle.length === 0);
 
   grid.innerHTML = '';
+  selStarred.forEach(c   => grid.appendChild(buildCard(c, 'add')));
   selJungle.forEach(c    => grid.appendChild(buildCard(c, 'add')));
   selNonJungle.forEach(c => grid.appendChild(buildCard(c, 'add')));
   unselected.forEach(c   => grid.appendChild(buildCard(c, 'add')));
@@ -435,6 +651,27 @@ function buildCard(champ, mode) {
     badge.className = 'card-badge';
     badge.textContent = '✓';
     card.appendChild(badge);
+  } else if (mode === 'add' && !inPool) {
+    const hollow = document.createElement('div');
+    hollow.className = 'card-badge-hollow';
+    card.appendChild(hollow);
+  }
+
+  // Star button (pin to front) — only for champions in pool
+  if (inPool) {
+    const isStarred = state.starred.has(champ.id);
+    const star = document.createElement('button');
+    star.className = 'card-star' + (isStarred ? ' is-starred' : '');
+    star.type = 'button';
+    star.textContent = isStarred ? '★' : '☆';
+    star.title = isStarred ? t('unpin_title') : t('pin_title');
+    star.addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleStar(champ.id);
+      if (mode === 'add') renderAddGrid();
+      else renderPoolGrid();
+    });
+    card.appendChild(star);
   }
 
   // Interactive hover panel
@@ -453,11 +690,20 @@ function buildCard(champ, mode) {
   return card;
 }
 
+// ===== TOGGLE STAR (pin to front) =====
+function toggleStar(id) {
+  if (!state.pool.has(id)) return; // only pool members can be starred
+  if (state.starred.has(id)) state.starred.delete(id);
+  else state.starred.add(id);
+  saveState();
+}
+
 // ===== TOGGLE POOL MEMBERSHIP =====
 function togglePool(id) {
   if (state.pool.has(id)) {
     state.pool.delete(id);
     state.junglers.delete(id);
+    state.starred.delete(id);
   } else {
     state.pool.add(id);
     // Auto-mark as jungler if in the default jungler list
@@ -572,40 +818,42 @@ function renderHoverPanel(champId) {
   // Hard rule: a champion cannot appear in both 克制 and 被克制
   const countersSet = new Set(counters);
   const beCountered = getBeCounteredBy(champId).filter(cc => !countersSet.has(cc.id));
-  const displayName = champ.zhName ? `${champ.zhName} · ${champ.name}` : champ.name;
+  const displayName = champ.zhName
+    ? (currentLang === 'en' ? `${champ.name} · ${champ.zhName}` : `${champ.zhName} · ${champ.name}`)
+    : champ.name;
 
   // ── Tags section ──
   let tagsHtml = `<div class="hp-section-head">
-    <span class="hp-section-title">关键词</span>
+    <span class="hp-section-title">${t('hp_keywords')}</span>
     <button class="hp-plus-btn" onclick="toggleHpTagPicker()">+</button>
   </div>`;
   if (tags.length > 0) {
     tagsHtml += '<div class="hp-tags">';
-    tags.forEach(t => {
-      tagsHtml += `<span class="hp-tag"><span class="hp-tag-link" onclick="hpClickTag('${t}')">${t}</span><button class="hp-tag-x" onclick="hpRemoveTag('${champId}','${t}')">×</button></span>`;
+    tags.forEach(tg => {
+      tagsHtml += `<span class="hp-tag"><span class="hp-tag-link" onclick="hpClickTag('${tg}')">${displayTag(tg)}</span><button class="hp-tag-x" onclick="hpRemoveTag('${champId}','${tg}')">×</button></span>`;
     });
     tagsHtml += '</div>';
   } else if (!hpTagPickerOpen) {
-    tagsHtml += '<div class="hp-empty">暂无词条</div>';
+    tagsHtml += `<div class="hp-empty">${t('hp_no_tags')}</div>`;
   }
   if (hpTagPickerOpen) {
-    const available = [...allKeywordTags()].filter(t => !tags.includes(t));
+    const available = [...allKeywordTags()].filter(tg => !tags.includes(tg));
     tagsHtml += '<div class="hp-tag-picker-divider"></div>';
-    tagsHtml += '<div class="hp-picker-label">可选</div>';
+    tagsHtml += `<div class="hp-picker-label">${t('hp_available')}</div>`;
     if (available.length > 0) {
       tagsHtml += '<div class="hp-tag-picker">';
-      available.forEach(t => {
-        tagsHtml += `<button class="hp-tag-option" onclick="hpAddTag('${champId}','${t}')">${t}</button>`;
+      available.forEach(tg => {
+        tagsHtml += `<button class="hp-tag-option" onclick="hpAddTag('${champId}','${tg}')">${displayTag(tg)}</button>`;
       });
       tagsHtml += '</div>';
     } else {
-      tagsHtml += '<div class="hp-empty">所有词条已添加</div>';
+      tagsHtml += `<div class="hp-empty">${t('hp_all_tags_added')}</div>`;
     }
   }
 
-  // ── 克制 section (this champ counters these) ──
+  // ── counters section (this champ counters these) ──
   let ctrsHtml = `<div class="hp-section-head">
-    <span class="hp-section-title">克制</span>
+    <span class="hp-section-title">${t('hp_counters')}</span>
     <button class="hp-plus-btn" onclick="toggleHpCounterSearch()">+</button>
   </div>`;
   if (counters.length > 0) {
@@ -615,24 +863,24 @@ function renderHoverPanel(champId) {
       if (!cc) return;
       ctrsHtml += `<div class="hp-counter-item">
         <img class="hp-nav-img" src="${getChampionIcon(cid, cc.wrOnly)}" alt="" onerror="this.src='${PLACEHOLDER_IMG}'" onclick="hpNavigateToChamp('${cid}')">
-        <span class="hp-nav-name" onclick="hpNavigateToChamp('${cid}')">${cc.zhName || cc.name}</span>
+        <span class="hp-nav-name" onclick="hpNavigateToChamp('${cid}')">${displayChampName(cc)}</span>
         <button class="hp-tag-x" onclick="hpRemoveCounter('${champId}','${cid}')">×</button>
       </div>`;
     });
     ctrsHtml += '</div>';
   } else if (!hpCounterSearchOpen) {
-    ctrsHtml += '<div class="hp-empty">暂无克制记录</div>';
+    ctrsHtml += `<div class="hp-empty">${t('hp_no_counters')}</div>`;
   }
   if (hpCounterSearchOpen) {
     ctrsHtml += `<input type="text" class="hp-counter-search" id="hp-counter-search"
-      placeholder="搜索英雄..." oninput="hpRenderCounterResults('${champId}',this.value)"
+      placeholder="${t('hp_search_champ')}" oninput="hpRenderCounterResults('${champId}',this.value)"
       onclick="event.stopPropagation()">
     <div id="hp-counter-results" class="hp-counter-results"></div>`;
   }
 
-  // ── 被克制 section (these champs counter this one) ──
+  // ── be-countered section (these champs counter this one) ──
   let beCtrsHtml = `<div class="hp-section-head">
-    <span class="hp-section-title">被克制</span>
+    <span class="hp-section-title">${t('hp_be_countered')}</span>
     <button class="hp-plus-btn" onclick="toggleHpBeCounterSearch()">+</button>
   </div>`;
   if (beCountered.length > 0) {
@@ -640,17 +888,17 @@ function renderHoverPanel(champId) {
     beCountered.forEach(cc => {
       beCtrsHtml += `<div class="hp-counter-item">
         <img class="hp-nav-img" src="${getChampionIcon(cc.id, cc.wrOnly)}" alt="" onerror="this.src='${PLACEHOLDER_IMG}'" onclick="hpNavigateToChamp('${cc.id}')">
-        <span class="hp-nav-name" onclick="hpNavigateToChamp('${cc.id}')">${cc.zhName || cc.name}</span>
+        <span class="hp-nav-name" onclick="hpNavigateToChamp('${cc.id}')">${displayChampName(cc)}</span>
         <button class="hp-tag-x" onclick="hpRemoveBeCounter('${champId}','${cc.id}')">×</button>
       </div>`;
     });
     beCtrsHtml += '</div>';
   } else if (!hpBeCounterSearchOpen) {
-    beCtrsHtml += '<div class="hp-empty">暂无被克制记录</div>';
+    beCtrsHtml += `<div class="hp-empty">${t('hp_no_be_countered')}</div>`;
   }
   if (hpBeCounterSearchOpen) {
     beCtrsHtml += `<input type="text" class="hp-counter-search" id="hp-be-counter-search"
-      placeholder="搜索英雄..." oninput="hpRenderBeCounterResults('${champId}',this.value)"
+      placeholder="${t('hp_search_champ')}" oninput="hpRenderBeCounterResults('${champId}',this.value)"
       onclick="event.stopPropagation()">
     <div id="hp-be-counter-results" class="hp-counter-results"></div>`;
   }
@@ -659,13 +907,13 @@ function renderHoverPanel(champId) {
     <div class="hp-champ-header">${displayName}</div>
     <div class="hp-section">${tagsHtml}</div>
     <div class="hp-divider"></div>
-    <div class="hp-hint"><span class="hp-hint-label">阵容关键词推荐：</span><br>1.<span class="hp-kw">肉</span>（视野） 2.<span class="hp-kw">前期/节奏</span> 3.<span class="hp-kw">后期/大C射手</span> 4.<span class="hp-kw">收割/刺客</span> 5. <span class="hp-kw">控制</span>（越多越好）</div>
+    <div class="hp-hint"><span class="hp-hint-label">${t('hp_hint_comp_label')}</span><br>${t('hp_hint_comp')}</div>
     <div class="hp-divider"></div>
     <div class="hp-section">${ctrsHtml}</div>
     <div class="hp-divider"></div>
     <div class="hp-section">${beCtrsHtml}</div>
     <div class="hp-divider"></div>
-    <div class="hp-hint"><span class="hp-hint-label">通用克制链（→表示克制）：</span><br><span class="hp-kw">刺客/控制/爆发</span> → <span class="hp-kw">后期大C射手</span><br><span class="hp-kw">后期大C射手</span> → <span class="hp-kw">肉</span><br><span class="hp-kw">肉</span> → <span class="hp-kw">刺客/爆发</span></div>
+    <div class="hp-hint"><span class="hp-hint-label">${t('hp_hint_chain_label')}</span><br>${t('hp_hint_chain')}</div>
   `;
 
   const focusId = hpCounterSearchOpen ? 'hp-counter-search' : hpBeCounterSearchOpen ? 'hp-be-counter-search' : null;
@@ -731,11 +979,11 @@ function hpRenderCounterResults(champId, query) {
     const row = document.createElement('div');
     row.className = 'hp-result-row';
     row.innerHTML = `<img src="${getChampionIcon(cc.id, cc.wrOnly)}" alt="" onerror="this.src='${PLACEHOLDER_IMG}'">
-      <span>${cc.zhName || cc.name}</span>`;
+      <span>${displayChampName(cc)}</span>`;
     row.onclick = (e) => { e.stopPropagation(); hpAddCounter(champId, cc.id); };
     results.appendChild(row);
   });
-  if (candidates.length === 0) results.innerHTML = '<div class="hp-empty">无匹配英雄</div>';
+  if (candidates.length === 0) results.innerHTML = `<div class="hp-empty">${t('no_match')}</div>`;
 }
 
 function hpAddCounter(champId, targetId) {
@@ -779,11 +1027,11 @@ function hpRenderBeCounterResults(champId, query) {
     const row = document.createElement('div');
     row.className = 'hp-result-row';
     row.innerHTML = `<img src="${getChampionIcon(cc.id, cc.wrOnly)}" alt="" onerror="this.src='${PLACEHOLDER_IMG}'">
-      <span>${cc.zhName || cc.name}</span>`;
+      <span>${displayChampName(cc)}</span>`;
     row.onclick = (e) => { e.stopPropagation(); hpAddBeCounter(champId, cc.id); };
     results.appendChild(row);
   });
-  if (candidates.length === 0) results.innerHTML = '<div class="hp-empty">无匹配英雄</div>';
+  if (candidates.length === 0) results.innerHTML = `<div class="hp-empty">${t('no_match')}</div>`;
 }
 
 function hpAddBeCounter(champId, sourceId) {
@@ -882,7 +1130,7 @@ function openModal(id) {
   const champObj = ALL_CHAMPIONS.find(c => c.id === id);
   document.getElementById('modal-champ-img').src  = getChampionIcon(id, champObj?.wrOnly);
   document.getElementById('modal-champ-img').onerror = function() { this.src = PLACEHOLDER_IMG; };
-  document.getElementById('modal-champ-name').textContent = champ.name;
+  document.getElementById('modal-champ-name').textContent = displayChampName(champ);
 
   // Toggle
   const track = document.getElementById('jungler-track');
@@ -913,7 +1161,7 @@ function renderModalTags() {
   tags.forEach((tag, i) => {
     const pill = document.createElement('div');
     pill.className = 'tag-pill';
-    pill.innerHTML = `<span>${tag}</span><button onclick="removeTag(${i})" title="删除">×</button>`;
+    pill.innerHTML = `<span>${displayTag(tag)}</span><button onclick="removeTag(${i})" title="${t('delete')}">×</button>`;
     el.appendChild(pill);
   });
 }
@@ -951,8 +1199,8 @@ function renderModalCounters() {
     pill.className = 'counter-pill';
     pill.innerHTML = `
       <img src="${getChampionIcon(cid, ALL_CHAMPIONS.find(x=>x.id===cid)?.wrOnly)}" alt="${cc.name}" onerror="this.src='${PLACEHOLDER_IMG}'">
-      <span class="cpill-name">${cc.name}</span>
-      <button class="cpill-remove" onclick="removeCounter('${cid}')" title="移除">×</button>`;
+      <span class="cpill-name">${displayChampName(cc)}</span>
+      <button class="cpill-remove" onclick="removeCounter('${cid}')" title="${t('remove')}">×</button>`;
 
     // Tooltip on counter pill
     const tempChamp = cc;
@@ -981,7 +1229,7 @@ function renderCounterDropdown() {
     item.className = 'counter-drop-item';
     item.innerHTML = `
       <img src="${getChampionIcon(cc.id)}" alt="${cc.name}" onerror="this.src='${PLACEHOLDER_IMG}'">
-      <span>${cc.name}</span>`;
+      <span>${displayChampName(cc)}</span>`;
     item.addEventListener('click', () => addCounter(cc.id));
     dropdown.appendChild(item);
   });
@@ -1028,11 +1276,12 @@ function toggleJungler() {
 function removeFromPool() {
   if (!editingChampId) return;
   const champ = ALL_CHAMPIONS.find(c => c.id === editingChampId);
-  const name  = champ ? champ.name : editingChampId;
-  if (!confirm(`将 ${name} 从英雄池移除?`)) return;
+  const name  = champ ? displayChampName(champ) : editingChampId;
+  if (!confirm(t('confirm_remove', name))) return;
 
   state.pool.delete(editingChampId);
   state.junglers.delete(editingChampId);
+  state.starred.delete(editingChampId);
   saveState();
   closeModal();
 }
@@ -1085,6 +1334,7 @@ function scrollAddGridToTop() {
 
 // ===== INIT =====
 initDataModeToggle();
+applyI18n();
 loadState();
 refreshStoredOverrides();
 buildKeywordChips();
