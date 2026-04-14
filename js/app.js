@@ -496,7 +496,7 @@ function attachHoverPanel(el, champ) {
   el.addEventListener('mouseleave', (e) => {
     clearTimeout(hpShowTimeout);
     if (el !== hpSourceCard) return;
-    if (!tooltipEl.contains(e.relatedTarget)) hpTimeout = setTimeout(hideHoverPanel, 120);
+    if (!tooltipEl.contains(e.relatedTarget)) hpTimeout = setTimeout(hideHoverPanel, 2000);
   });
 }
 
@@ -515,7 +515,7 @@ function showHoverPanel(champ, cardEl) {
 
   tooltipEl.onmouseenter = () => clearTimeout(hpTimeout);
   tooltipEl.onmouseleave = (e) => {
-    if (!cardEl.contains(e.relatedTarget)) hpTimeout = setTimeout(hideHoverPanel, 120);
+    if (!cardEl.contains(e.relatedTarget)) hpTimeout = setTimeout(hideHoverPanel, 2000);
   };
 }
 
