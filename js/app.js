@@ -9,6 +9,8 @@ const I18N = {
     title_version: "Patch: 7.1a &nbsp; Latest Champion: K'Sante &nbsp; Author: 长风入萧曲悠扬，梨花梦中烟消散",
     local_dev_only: "Local dev only",
     use_personal_data: "Use personal data",
+    data_default: "Default",
+    data_personal: "Personal",
     lane_all: "All",
     lane_baron: "Baron",
     lane_jungle: "Jungle",
@@ -59,6 +61,8 @@ const I18N = {
     title_version: "游戏版本：7.1a &nbsp; 最新英雄：奎桑提 &nbsp; Author: 长风, 梨花",
     local_dev_only: "仅本地开发环境可见",
     use_personal_data: "使用个人数据",
+    data_default: "默认数据",
+    data_personal: "个人数据",
     lane_all: "全部",
     lane_baron: "上单",
     lane_jungle: "打野",
@@ -276,13 +280,9 @@ function getDefaultChampData() {
 }
 
 function getPersonalChampData() {
-  const seed = getDefaultChampData();
-  if (typeof PERSONAL_CHAMP_DATA !== 'undefined') {
-    Object.keys(PERSONAL_CHAMP_DATA).forEach(id => {
-      seed[id] = cloneChampDatum(PERSONAL_CHAMP_DATA[id]);
-    });
-  }
-  return seed;
+  // Personal mode is a truly blank slate — no author/default seeding.
+  // Users build their own tags and counter relationships from scratch.
+  return {};
 }
 
 function getBaseChampData() {
@@ -361,36 +361,53 @@ function refreshStoredOverrides() {
   saveState();
 }
 
-function initDataModeToggle() {
-  const wrap = document.getElementById('local-data-toggle');
-  const input = document.getElementById('use-personal-data-toggle');
-  if (!wrap || !input) return;
+function updateDataToggleUI() {
+  const buttons = document.querySelectorAll('#data-toggle .data-toggle-btn');
+  if (buttons.length < 2) return;
+  buttons[0].classList.toggle('active', !usePersonalData);
+  buttons[1].classList.toggle('active',  usePersonalData);
+}
 
-  if (!isLocalDevEnvironment()) {
-    wrap.remove();
-    usePersonalData = false;
-    return;
+function setDataMode(personal) {
+  personal = !!personal;
+  if (personal === usePersonalData) return;
+
+  // Persist current mode's state, then switch
+  saveState();
+  usePersonalData = personal;
+  localStorage.setItem('wr-bp-use-personal-data', usePersonalData ? 'true' : 'false');
+  loadState();
+  refreshStoredOverrides();
+
+  // Clear undo history — different data context
+  undoStack.length = 0;
+  redoStack.length = 0;
+
+  updateDataToggleUI();
+  rerenderCurrentView();
+}
+
+function initDataModeToggle() {
+  // One-time migration: the personal-mode semantics changed from
+  // "default + overlay" to a truly blank slate. Any stale data saved under
+  // the old scheme (or the older global v1 key) would leak default content
+  // into the new blank-slate personal mode, so wipe it on first run.
+  const MIGRATION_KEY = 'wr-bp-personal-reset-v2';
+  if (localStorage.getItem(MIGRATION_KEY) !== 'done') {
+    localStorage.removeItem('wr-bp-personal-v1');
+    localStorage.removeItem(LEGACY_STATE_STORAGE_KEY);
+    localStorage.setItem(MIGRATION_KEY, 'done');
   }
 
   usePersonalData = localStorage.getItem('wr-bp-use-personal-data') === 'true';
-  wrap.classList.remove('hidden');
-  input.checked = usePersonalData;
-  input.addEventListener('change', () => {
-    saveState();
-    usePersonalData = input.checked;
-    localStorage.setItem('wr-bp-use-personal-data', usePersonalData ? 'true' : 'false');
-    loadState();
-    refreshStoredOverrides();
-    rerenderCurrentView();
-  });
+  updateDataToggleUI();
 }
 
 // ===== PERSISTENCE =====
 function loadState() {
   state = createEmptyState();
   try {
-    const raw = localStorage.getItem(getStateStorageKey()) ||
-      (usePersonalData ? localStorage.getItem(LEGACY_STATE_STORAGE_KEY) : null);
+    const raw = localStorage.getItem(getStateStorageKey());
     if (raw) {
       const parsed = JSON.parse(raw);
       state.pool       = new Set(parsed.pool      || []);
@@ -690,9 +707,63 @@ function buildCard(champ, mode) {
   return card;
 }
 
+// ===== UNDO / REDO (selection history) =====
+const undoStack = [];
+const redoStack = [];
+const MAX_UNDO = 100;
+
+function snapshotSelection() {
+  return {
+    pool:     [...state.pool],
+    junglers: [...state.junglers],
+    starred:  [...state.starred],
+  };
+}
+
+function restoreSelection(snap) {
+  state.pool     = new Set(snap.pool);
+  state.junglers = new Set(snap.junglers);
+  state.starred  = new Set(snap.starred);
+}
+
+function pushUndo() {
+  undoStack.push(snapshotSelection());
+  if (undoStack.length > MAX_UNDO) undoStack.shift();
+  redoStack.length = 0;
+}
+
+function rerenderAfterHistory() {
+  saveState();
+  if (document.getElementById('add-screen')?.classList.contains('active')) {
+    renderAddGrid();
+  }
+  if (document.getElementById('pool-screen')?.classList.contains('active')) {
+    renderPoolGrid();
+  }
+}
+
+function undoSelection() {
+  if (undoStack.length === 0) return;
+  const current = snapshotSelection();
+  const prev    = undoStack.pop();
+  redoStack.push(current);
+  restoreSelection(prev);
+  rerenderAfterHistory();
+}
+
+function redoSelection() {
+  if (redoStack.length === 0) return;
+  const current = snapshotSelection();
+  const next    = redoStack.pop();
+  undoStack.push(current);
+  restoreSelection(next);
+  rerenderAfterHistory();
+}
+
 // ===== TOGGLE STAR (pin to front) =====
 function toggleStar(id) {
   if (!state.pool.has(id)) return; // only pool members can be starred
+  pushUndo();
   if (state.starred.has(id)) state.starred.delete(id);
   else state.starred.add(id);
   saveState();
@@ -700,6 +771,7 @@ function toggleStar(id) {
 
 // ===== TOGGLE POOL MEMBERSHIP =====
 function togglePool(id) {
+  pushUndo();
   if (state.pool.has(id)) {
     state.pool.delete(id);
     state.junglers.delete(id);
@@ -1260,6 +1332,7 @@ function removeCounter(cid) {
 // --- Jungler toggle ---
 function toggleJungler() {
   if (!editingChampId) return;
+  pushUndo();
   junglerOn = !junglerOn;
   const track = document.getElementById('jungler-track');
   track.classList.toggle('on', junglerOn);
@@ -1279,6 +1352,7 @@ function removeFromPool() {
   const name  = champ ? displayChampName(champ) : editingChampId;
   if (!confirm(t('confirm_remove', name))) return;
 
+  pushUndo();
   state.pool.delete(editingChampId);
   state.junglers.delete(editingChampId);
   state.starred.delete(editingChampId);
@@ -1287,6 +1361,26 @@ function removeFromPool() {
 }
 
 // ===== KEYBOARD SHORTCUTS =====
+// Cmd/Ctrl+Z undo, Cmd/Ctrl+Shift+Z (or Cmd/Ctrl+Y) redo — for selection history
+document.addEventListener('keydown', e => {
+  const tag = (e.target && e.target.tagName) || '';
+  const isEditable = tag === 'INPUT' || tag === 'TEXTAREA' || (e.target && e.target.isContentEditable);
+  if (isEditable) return;
+
+  const mod = e.metaKey || e.ctrlKey;
+  if (!mod) return;
+  const key = e.key.toLowerCase();
+
+  if (key === 'z') {
+    e.preventDefault();
+    if (e.shiftKey) redoSelection();
+    else undoSelection();
+  } else if (key === 'y') {
+    e.preventDefault();
+    redoSelection();
+  }
+});
+
 document.getElementById('tag-input').addEventListener('keydown', e => {
   if (e.key === 'Enter') addTag();
 });
