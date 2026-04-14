@@ -205,10 +205,16 @@ input  { font-family: inherit; }
   position: relative;
 }
 
-/* Champions with custom Wild Rift splash art: darken a 5px inner ring so
-   the dark splash edge is visually separated from the surrounding UI. */
-.champ-img-wrap.has-custom-art {
-  box-shadow: inset 0 0 0 5px #000;
+/* Champions with custom Wild Rift splash art: soft 3px dark vignette around
+   the edges that fades out toward the center. Sits above the image but below
+   the corner badges (star / check), since they live at z-index: 3. */
+.champ-img-wrap.has-custom-art::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  box-shadow: inset 0 0 4px 4.24px rgba(0, 0, 0, 1);
+  pointer-events: none;
+  z-index: 2;
 }
 .champ-card img {
   width: 100%;
@@ -283,6 +289,7 @@ input  { font-family: inherit; }
   font-weight: 700;
   pointer-events: none;
   box-sizing: border-box;
+  z-index: 3;
 }
 
 /* Hollow checkbox — shown on hover for unselected champions (matches .card-badge size) */
@@ -299,6 +306,7 @@ input  { font-family: inherit; }
   transition: opacity 0.15s ease;
   pointer-events: none;
   box-shadow: 0 0 3px rgba(0, 0, 0, 0.6);
+  z-index: 3;
 }
 .champ-card:hover .card-badge-hollow {
   opacity: 0.9;
