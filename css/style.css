@@ -100,12 +100,12 @@ input  { font-family: inherit; }
 
 .search-wrap input {
   flex: 1;
-  max-width: 380px;
+  max-width: 480px;
   background: #0d0d0d;
   border: 1px solid #333;
   color: #fff;
-  padding: 9px 14px;
-  font-size: 0.85rem;
+  padding: 14px 18px;
+  font-size: 1.05rem;
   outline: none;
   transition: border-color 0.15s;
 }
@@ -1134,9 +1134,9 @@ input  { font-family: inherit; }
   background: transparent;
   border: 1px solid #3a3a3a;
   color: #ccc;
-  padding: 4px 12px;
-  font-size: 0.82rem;
-  letter-spacing: 1px;
+  padding: 8px 20px;
+  font-size: 1rem;
+  letter-spacing: 1.2px;
   cursor: pointer;
   transition: all 0.15s;
 }
