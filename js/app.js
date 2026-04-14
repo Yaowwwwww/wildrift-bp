@@ -769,11 +769,11 @@ function buildCard(champ, mode) {
     const badge = document.createElement('div');
     badge.className = 'card-badge';
     badge.textContent = '✓';
-    card.appendChild(badge);
+    imgWrap.appendChild(badge);
   } else if (mode === 'add' && !inPool) {
     const hollow = document.createElement('div');
     hollow.className = 'card-badge-hollow';
-    card.appendChild(hollow);
+    imgWrap.appendChild(hollow);
   }
 
   // Star button (pin to front) — only for champions in pool
@@ -790,7 +790,7 @@ function buildCard(champ, mode) {
       if (mode === 'add') renderAddGrid();
       else renderPoolGrid();
     });
-    card.appendChild(star);
+    imgWrap.appendChild(star);
   }
 
   // Interactive hover panel

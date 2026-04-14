@@ -1352,9 +1352,15 @@ body.lang-en .champ-card.hp-active .champ-name .en { color: #f5f0a0; }
   }
   .tagline-line { display: none; }
   .champ-grid {
-    padding: 10px 12px 500px;
+    padding: 10px 28px 500px;
     gap: 8px;
     grid-template-columns: repeat(auto-fill, minmax(72px, 1fr));
+  }
+  .champ-img-wrap {
+    width: 100%;
+    max-width: 78px;
+    aspect-ratio: 1 / 1;
+    height: auto;
   }
 
   .site-footer {
