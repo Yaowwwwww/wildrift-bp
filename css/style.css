@@ -992,11 +992,39 @@ input  { font-family: inherit; }
   user-select: none;
 }
 .footer-copyright,
+.footer-visits,
 .title-version {
   font-size: 0.82rem;
   color: #888;
   letter-spacing: 1.2px;
   font-weight: 400;
+}
+.footer-visits {
+  position: relative;
+}
+.footer-visits #visit-count {
+  color: #f0e68c;
+  font-weight: 600;
+  margin-left: 2px;
+  transition: transform 0.25s ease;
+}
+.visit-bubble {
+  position: absolute;
+  top: -14px;
+  right: -28px;
+  color: #f0e68c;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  pointer-events: none;
+  text-shadow: 0 0 8px rgba(240, 230, 140, 0.6);
+  animation: visit-bubble-fly 1.2s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+}
+@keyframes visit-bubble-fly {
+  0%   { opacity: 0; transform: translateY(4px) scale(0.8); }
+  15%  { opacity: 1; transform: translateY(0) scale(1.1); }
+  30%  { transform: translateY(-2px) scale(1); }
+  100% { opacity: 0; transform: translateY(-24px) scale(0.95); }
 }
 
 #add-screen .screen-header h2 .title-sep {

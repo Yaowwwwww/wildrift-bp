@@ -64,6 +64,7 @@
   <button id="back-to-top" class="back-to-top is-hidden" onclick="scrollAddGridToTop()" data-i18n-title="back_to_top" title="回到顶部">↑</button>
   <footer class="site-footer">
     <span class="footer-copyright">WILDRIFT&middot;BP &nbsp;&copy;&nbsp; 2026 &nbsp;·&nbsp; All rights reserved</span>
+    <span class="footer-visits"><span data-i18n="footer_visits">访问量</span>: <span id="visit-count">—</span></span>
     <span class="title-version" data-i18n="title_version">游戏版本：7.1a &nbsp; 最新英雄：奎桑提 &nbsp; Author: 长风, 梨花</span>
   </footer>
 </div>
@@ -160,6 +161,7 @@
   </div>
 </div>
 
+<script defer src="/_vercel/insights/script.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/champions-data.js"></script>
 <script src="js/user-data.js"></script>

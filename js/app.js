@@ -69,6 +69,7 @@ const I18N = {
     merge_union: "Merge (recommended)",
     merge_use_cloud: "Use cloud, discard local",
     merge_keep_local: "Keep local, overwrite cloud",
+    footer_visits: "Visits",
     hp_hint_comp_label: "Team Comp Keywords:",
     hp_hint_comp: '1.<span class="hp-kw">Tank</span> (Vision) 2.<span class="hp-kw">Early/Tempo</span> 3.<span class="hp-kw">Late/Hypercarry ADC</span> 4.<span class="hp-kw">Reaper/Assassin</span> 5. <span class="hp-kw">Control</span> (more the better)',
     hp_hint_chain_label: "Counter Chain (→ means counters):",
@@ -146,6 +147,7 @@ const I18N = {
     merge_union: "合并（推荐）",
     merge_use_cloud: "使用云端，丢弃本地",
     merge_keep_local: "保留本地，覆盖云端",
+    footer_visits: "访问量",
     hp_hint_comp_label: "阵容关键词推荐：",
     hp_hint_comp: '1.<span class="hp-kw">肉</span>（视野） 2.<span class="hp-kw">前期/节奏</span> 3.<span class="hp-kw">后期/大C射手</span> 4.<span class="hp-kw">收割/刺客</span> 5. <span class="hp-kw">控制</span>（越多越好）',
     hp_hint_chain_label: "通用克制链（→表示克制）：",
@@ -529,6 +531,7 @@ function showScreen(id) {
   } else if (id === 'add-screen') {
     renderAddGrid();
   }
+  if (window.bumpVisitCount) window.bumpVisitCount();
 }
 
 
@@ -658,6 +661,7 @@ function switchAddLane(lane) {
   document.querySelectorAll('.lane-tab').forEach(b => b.classList.remove('active'));
   document.getElementById('lane-' + lane).classList.add('active');
   renderAddGrid();
+  if (window.bumpVisitCount) window.bumpVisitCount();
 }
 
 function onAddSearch() {

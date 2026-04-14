@@ -60,6 +60,9 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
       if (currentUser) pullAndApply(currentUser.id);
     });
 
+    // Bump + display the public visit counter. Fire-and-forget; failures are silent.
+    trackVisit();
+
     // React to future sign-in / sign-out / token refresh
     client.auth.onAuthStateChange((event, session) => {
       currentUser  = (session && session.user) || null;
@@ -460,6 +463,65 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
   function escapeHtml(str) {
     return String(str).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   }
+
+  // ───────────────────────────────────────────────────────────
+  // Visit counter — increments a single-row site_stats table via RPC
+  // and renders the total into #visit-count.
+  // ───────────────────────────────────────────────────────────
+  // Pseudo-dynamic visit counter:
+  //   displayed = 1000 + real_total + random(-100, 100)
+  //   On user actions (lane switch, screen change), bump by 1/2/3/5
+  //   and play a floating "+N" animation next to the counter.
+  const VISIT_BASE = 1000;
+  let displayedVisits = 0;
+
+  function renderVisitCount(n, animate) {
+    const el = document.getElementById('visit-count');
+    if (!el) return;
+    const prev = displayedVisits;
+    displayedVisits = n;
+    el.textContent = n.toLocaleString();
+    if (animate && n > prev) {
+      const delta = n - prev;
+      const parent = document.querySelector('.footer-visits');
+      if (!parent) return;
+      const bubble = document.createElement('span');
+      bubble.className = 'visit-bubble';
+      bubble.textContent = '+' + delta;
+      parent.appendChild(bubble);
+      setTimeout(() => bubble.remove(), 1200);
+    }
+  }
+
+  function trackVisit() {
+    if (!client) return;
+
+    // Bump real counter once on page load, then display with pseudo-dynamic offset
+    client.rpc('increment_visits').then(({ data, error }) => {
+      if (error) { console.warn('[visits] rpc error:', error); return; }
+      const real = typeof data === 'number' ? data : 0;
+      const offset = Math.floor(Math.random() * 201) - 100; // -100..+100
+      renderVisitCount(VISIT_BASE + real + offset, false);
+    }).catch(() => {});
+
+    // Realtime: when another visitor bumps the counter, nudge our displayed total too.
+    client.channel('site_stats_live')
+      .on('postgres_changes',
+          { event: 'UPDATE', schema: 'public', table: 'site_stats', filter: 'id=eq.1' },
+          () => {
+            // Someone else just incremented — add a small pseudo bump with animation
+            window.bumpVisitCount && window.bumpVisitCount();
+          })
+      .subscribe();
+  }
+
+  // Public: fired by app.js on UI state changes (lane switch, screen change, etc.)
+  window.bumpVisitCount = function () {
+    if (!displayedVisits) return;
+    const choices = [1, 2, 3, 5];
+    const n = choices[Math.floor(Math.random() * choices.length)];
+    renderVisitCount(displayedVisits + n, true);
+  };
 
   // ───────────────────────────────────────────────────────────
   // Public API
