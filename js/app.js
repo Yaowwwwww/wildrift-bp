@@ -6,7 +6,7 @@ const I18N = {
   en: {
     page_title: "Wild Rift Picking System",
     title_desc: "Click champions to add to your pool, check traits to patch team gaps, use counters in BP to avoid being pressured / to pressure opponents",
-    title_version: "Patch: 7.1a &nbsp; Latest Champion: K'Sante &nbsp; Author: 长风入萧曲悠扬，梨花梦中烟消散",
+    title_version: "Patch: 7.1a &nbsp; Latest Champion: K'Sante &nbsp; Author: 长风，梨花",
     lane_all: "All",
     lane_baron: "Baron",
     lane_jungle: "Jungle",
@@ -41,6 +41,9 @@ const I18N = {
     hp_search_champ: "Search champion...",
     hp_be_countered: "Countered By",
     hp_no_be_countered: "None",
+    hp_synergy: "Synergy",
+    hp_no_synergy: "None",
+    export_btn: "Export Data",
     hp_hint_comp_label: "Team Comp Keywords:",
     hp_hint_comp: '1.<span class="hp-kw">Tank</span> (Vision) 2.<span class="hp-kw">Early/Tempo</span> 3.<span class="hp-kw">Late/Hypercarry ADC</span> 4.<span class="hp-kw">Reaper/Assassin</span> 5. <span class="hp-kw">Control</span> (more the better)',
     hp_hint_chain_label: "Counter Chain (→ means counters):",
@@ -90,6 +93,9 @@ const I18N = {
     hp_search_champ: "搜索英雄...",
     hp_be_countered: "被克制",
     hp_no_be_countered: "暂无被克制记录",
+    hp_synergy: "配合",
+    hp_no_synergy: "暂无配合记录",
+    export_btn: "导出数据",
     hp_hint_comp_label: "阵容关键词推荐：",
     hp_hint_comp: '1.<span class="hp-kw">肉</span>（视野） 2.<span class="hp-kw">前期/节奏</span> 3.<span class="hp-kw">后期/大C射手</span> 4.<span class="hp-kw">收割/刺客</span> 5. <span class="hp-kw">控制</span>（越多越好）',
     hp_hint_chain_label: "通用克制链（→表示克制）：",
@@ -233,15 +239,22 @@ const ZOOM_OFFSETS = {
   Mordekaiser: { x: 4,   y: 16 },
   Maokai:      { x: -10, y: 0 },
   Jax:         { x: -4,  y: 8 },
+  Teemo:       { x: 6,   y: 6 },
 };
 
 // Champions whose art should be mirrored horizontally.
 const FLIP_CHAMPS = new Set(['Camille']);
 
+// Per-champion zoom scale override (defaults to 2 for ZOOM_2X_CHAMPS).
+const ZOOM_SCALES = {
+  Teemo: 1.55,
+};
+
 function buildChampImgTransform(champId) {
   const parts = [];
   if (ZOOM_2X_CHAMPS.has(champId)) {
-    parts.push('scale(2)');
+    const scale = ZOOM_SCALES[champId] || 2;
+    parts.push(`scale(${scale})`);
     const off = ZOOM_OFFSETS[champId];
     if (off) parts.push(`translate(${off.x}px, ${off.y}px)`);
   }
@@ -256,7 +269,8 @@ function hasOwn(obj, key) {
 function hasAnyChampData(data) {
   return ((data && data.tags) || []).length > 0 ||
     ((data && data.counters) || []).length > 0 ||
-    ((data && data.beCounteredBy) || []).length > 0;
+    ((data && data.beCounteredBy) || []).length > 0 ||
+    ((data && data.synergies) || []).length > 0;
 }
 
 function cloneChampDatum(data) {
@@ -266,6 +280,9 @@ function cloneChampDatum(data) {
   };
   if (data && hasOwn(data, 'beCounteredBy')) {
     cloned.beCounteredBy = [...(data.beCounteredBy || [])];
+  }
+  if (data && hasOwn(data, 'synergies')) {
+    cloned.synergies = [...(data.synergies || [])];
   }
   return cloned;
 }
@@ -277,9 +294,12 @@ function sameChampDatum(a, b) {
   const bCounters = (b && b.counters) || [];
   const aBeCounteredBy = (a && a.beCounteredBy) || [];
   const bBeCounteredBy = (b && b.beCounteredBy) || [];
+  const aSynergies = (a && a.synergies) || [];
+  const bSynergies = (b && b.synergies) || [];
   return JSON.stringify(aTags) === JSON.stringify(bTags) &&
     JSON.stringify(aCounters) === JSON.stringify(bCounters) &&
-    JSON.stringify(aBeCounteredBy) === JSON.stringify(bBeCounteredBy);
+    JSON.stringify(aBeCounteredBy) === JSON.stringify(bBeCounteredBy) &&
+    JSON.stringify(aSynergies) === JSON.stringify(bSynergies);
 }
 
 function getDefaultChampData() {
@@ -322,6 +342,7 @@ function ensureChampDataOverride(champId) {
   if (!state.champData[champId].tags) state.champData[champId].tags = [];
   if (!state.champData[champId].counters) state.champData[champId].counters = [];
   if (!state.champData[champId].beCounteredBy) state.champData[champId].beCounteredBy = [];
+  if (!state.champData[champId].synergies) state.champData[champId].synergies = [];
   return state.champData[champId];
 }
 
@@ -770,6 +791,7 @@ const tooltipEl = document.getElementById('tooltip');
 let hpTagPickerOpen      = false;
 let hpCounterSearchOpen  = false;
 let hpBeCounterSearchOpen = false;
+let hpSynergySearchOpen  = false;
 let hpTimeout            = null;
 let hpShowTimeout        = null;
 let hpLocked             = false;   // suppresses all hover during navigation
@@ -806,6 +828,7 @@ function showHoverPanel(champ, cardEl) {
   hpTagPickerOpen       = false;
   hpCounterSearchOpen   = false;
   hpBeCounterSearchOpen = false;
+  hpSynergySearchOpen   = false;
   renderHoverPanel(champ.id);
   tooltipEl.classList.remove('hidden');
   positionHoverPanel(cardEl);
@@ -869,6 +892,7 @@ function renderHoverPanel(champId) {
   const data       = getEffectiveChampData(champId);
   const tags       = data.tags     || [];
   const counters   = data.counters || [];
+  const synergies  = data.synergies || [];
   // Hard rule: a champion cannot appear in both 克制 and 被克制
   const countersSet = new Set(counters);
   const beCountered = getBeCounteredBy(champId).filter(cc => !countersSet.has(cc.id));
@@ -957,6 +981,33 @@ function renderHoverPanel(champId) {
     <div id="hp-be-counter-results" class="hp-counter-results"></div>`;
   }
 
+  // ── synergy section (mutual — adding X syncs both sides) ──
+  let synHtml = `<div class="hp-section-head">
+    <span class="hp-section-title">${t('hp_synergy')}</span>
+    <button class="hp-plus-btn" onclick="toggleHpSynergySearch()">+</button>
+  </div>`;
+  if (synergies.length > 0) {
+    synHtml += '<div class="hp-counters">';
+    synergies.forEach(sid => {
+      const cc = ALL_CHAMPIONS.find(x => x.id === sid);
+      if (!cc) return;
+      synHtml += `<div class="hp-counter-item">
+        <img class="hp-nav-img" src="${getChampionIcon(sid, cc.wrOnly)}" alt="" onerror="this.src='${PLACEHOLDER_IMG}'" onclick="hpNavigateToChamp('${sid}')">
+        <span class="hp-nav-name" onclick="hpNavigateToChamp('${sid}')">${displayChampName(cc)}</span>
+        <button class="hp-tag-x" onclick="hpRemoveSynergy('${champId}','${sid}')">×</button>
+      </div>`;
+    });
+    synHtml += '</div>';
+  } else if (!hpSynergySearchOpen) {
+    synHtml += `<div class="hp-empty">${t('hp_no_synergy')}</div>`;
+  }
+  if (hpSynergySearchOpen) {
+    synHtml += `<input type="text" class="hp-counter-search" id="hp-synergy-search"
+      placeholder="${t('hp_search_champ')}" oninput="hpRenderSynergyResults('${champId}',this.value)"
+      onclick="event.stopPropagation()">
+    <div id="hp-synergy-results" class="hp-counter-results"></div>`;
+  }
+
   tooltipEl.innerHTML = `
     <div class="hp-champ-header">${displayName}</div>
     <div class="hp-section">${tagsHtml}</div>
@@ -968,9 +1019,11 @@ function renderHoverPanel(champId) {
     <div class="hp-section">${beCtrsHtml}</div>
     <div class="hp-divider"></div>
     <div class="hp-hint"><span class="hp-hint-label">${t('hp_hint_chain_label')}</span><br>${t('hp_hint_chain')}</div>
+    <div class="hp-divider"></div>
+    <div class="hp-section">${synHtml}</div>
   `;
 
-  const focusId = hpCounterSearchOpen ? 'hp-counter-search' : hpBeCounterSearchOpen ? 'hp-be-counter-search' : null;
+  const focusId = hpCounterSearchOpen ? 'hp-counter-search' : hpBeCounterSearchOpen ? 'hp-be-counter-search' : hpSynergySearchOpen ? 'hp-synergy-search' : null;
   if (focusId) { const inp = document.getElementById(focusId); if (inp) setTimeout(() => inp.focus(), 30); }
 
   // re-position after content change
@@ -984,6 +1037,7 @@ function toggleHpTagPicker() {
   hpTagPickerOpen       = !hpTagPickerOpen;
   hpCounterSearchOpen   = false;
   hpBeCounterSearchOpen = false;
+  hpSynergySearchOpen   = false;
   renderHoverPanel(currentCardPanelId);
 }
 
@@ -991,6 +1045,7 @@ function toggleHpCounterSearch() {
   hpCounterSearchOpen   = !hpCounterSearchOpen;
   hpTagPickerOpen       = false;
   hpBeCounterSearchOpen = false;
+  hpSynergySearchOpen   = false;
   renderHoverPanel(currentCardPanelId);
 }
 
@@ -998,6 +1053,15 @@ function toggleHpBeCounterSearch() {
   hpBeCounterSearchOpen = !hpBeCounterSearchOpen;
   hpTagPickerOpen       = false;
   hpCounterSearchOpen   = false;
+  hpSynergySearchOpen   = false;
+  renderHoverPanel(currentCardPanelId);
+}
+
+function toggleHpSynergySearch() {
+  hpSynergySearchOpen   = !hpSynergySearchOpen;
+  hpTagPickerOpen       = false;
+  hpCounterSearchOpen   = false;
+  hpBeCounterSearchOpen = false;
   renderHoverPanel(currentCardPanelId);
 }
 
@@ -1106,6 +1170,53 @@ function hpAddBeCounter(champId, sourceId) {
 function hpRemoveBeCounter(champId, sourceId) {
   const sourceData = ensureChampDataOverride(sourceId);
   sourceData.counters = (sourceData.counters || []).filter(c => c !== champId);
+  saveState();
+  renderHoverPanel(champId);
+}
+
+// ── 配合 (Synergy) functions ── mutual: both sides' synergies lists get updated
+function hpRenderSynergyResults(champId, query) {
+  const results = document.getElementById('hp-synergy-results');
+  if (!results) return;
+  const q = query.toLowerCase().trim();
+  if (!q) { results.innerHTML = ''; return; }
+  const existing = new Set((getEffectiveChampData(champId) || {}).synergies || []);
+  const candidates = ALL_CHAMPIONS.filter(c => {
+    if (c.id === champId || existing.has(c.id)) return false;
+    return c.name.toLowerCase().includes(q) || (c.zhName && c.zhName.includes(q));
+  }).slice(0, 12);
+  results.innerHTML = '';
+  candidates.forEach(cc => {
+    const row = document.createElement('div');
+    row.className = 'hp-result-row';
+    row.innerHTML = `<img src="${getChampionIcon(cc.id, cc.wrOnly)}" alt="" onerror="this.src='${PLACEHOLDER_IMG}'">
+      <span>${displayChampName(cc)}</span>`;
+    row.onclick = (e) => { e.stopPropagation(); hpAddSynergy(champId, cc.id); };
+    results.appendChild(row);
+  });
+  if (candidates.length === 0) results.innerHTML = `<div class="hp-empty">${t('no_match')}</div>`;
+}
+
+function hpAddSynergy(champId, partnerId) {
+  const a = ensureChampDataOverride(champId);
+  const b = ensureChampDataOverride(partnerId);
+  if (!a.synergies.includes(partnerId)) a.synergies.push(partnerId);
+  if (!b.synergies.includes(champId))   b.synergies.push(champId);
+  saveState();
+  const inp = document.getElementById('hp-synergy-search');
+  const val = inp ? inp.value : '';
+  renderHoverPanel(champId);
+  setTimeout(() => {
+    const newInp = document.getElementById('hp-synergy-search');
+    if (newInp) { newInp.value = val; hpRenderSynergyResults(champId, val); newInp.focus(); }
+  }, 10);
+}
+
+function hpRemoveSynergy(champId, partnerId) {
+  const a = ensureChampDataOverride(champId);
+  const b = ensureChampDataOverride(partnerId);
+  a.synergies = (a.synergies || []).filter(x => x !== partnerId);
+  b.synergies = (b.synergies || []).filter(x => x !== champId);
   saveState();
   renderHoverPanel(champId);
 }
@@ -1416,6 +1527,73 @@ function scrollAddGridToTop() {
   grid.addEventListener('scroll', update, { passive: true });
   update();
 })();
+
+// ===== EXPORT DEFAULT DATA =====
+// Merges current localStorage overrides into DEFAULT_CHAMP_DATA and downloads
+// an updated copy of js/champions-data.js ready to commit.
+function exportDefaultData() {
+  const merged = getEffectiveChampDataMap();
+
+  const ids = Object.keys(merged).sort((a, b) => a.localeCompare(b));
+  const nameCol = Math.max(...ids.map(id => id.length)) + 1;
+  const strArr = arr => '[' + arr.map(s => JSON.stringify(s)).join(',') + ']';
+  const lines = [];
+  for (const id of ids) {
+    const d = merged[id] || {};
+    const tags = (d.tags || []).length ? d.tags : null;
+    const counters = (d.counters || []).length ? d.counters : null;
+    const synergies = (d.synergies || []).length ? d.synergies : null;
+    if (!tags && !counters && !synergies) continue;
+    const parts = [];
+    if (tags) parts.push(`tags: ${strArr(tags)}`);
+    if (counters) parts.push(`counters: ${strArr(counters)}`);
+    if (synergies) parts.push(`synergies: ${strArr(synergies)}`);
+    const pad = ' '.repeat(nameCol - id.length);
+    lines.push(`  ${id}:${pad}{ ${parts.join(', ')} },`);
+  }
+  const newBlock = 'const DEFAULT_CHAMP_DATA = {\n' + lines.join('\n') + '\n};';
+
+  fetch('js/champions-data.js')
+    .then(r => {
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return r.text();
+    })
+    .then(src => {
+      const startIdx = src.indexOf('const DEFAULT_CHAMP_DATA');
+      if (startIdx < 0) throw new Error('DEFAULT_CHAMP_DATA not found in source');
+      const braceStart = src.indexOf('{', startIdx);
+      let depth = 0, endIdx = -1;
+      for (let i = braceStart; i < src.length; i++) {
+        const ch = src[i];
+        if (ch === '{') depth++;
+        else if (ch === '}') {
+          depth--;
+          if (depth === 0) {
+            const semi = src.indexOf(';', i);
+            endIdx = (semi >= 0 && semi < i + 3) ? semi + 1 : i + 1;
+            break;
+          }
+        }
+      }
+      if (endIdx < 0) throw new Error('Could not find end of DEFAULT_CHAMP_DATA block');
+
+      const updated = src.slice(0, startIdx) + newBlock + src.slice(endIdx);
+      const blob = new Blob([updated], { type: 'text/javascript' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'champions-data.js';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    })
+    .catch(err => {
+      alert('Export failed: ' + err.message +
+        '\n\nTip: requires loading the page over http:// (not file://). ' +
+        'Run e.g. `python3 -m http.server 8000` in the project root.');
+    });
+}
 
 // ===== INIT =====
 applyI18n();
