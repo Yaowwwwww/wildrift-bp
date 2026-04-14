@@ -601,7 +601,7 @@ function buildKeywordChips() {
   container.appendChild(allBtn);
 
   // Priority keywords — pinned at front (right after "All") and visually highlighted.
-  const PRIORITY_TAGS = ["控制", "肉", "打肉", "前期", "后期"];
+  const PRIORITY_TAGS = ["控制", "肉", "打肉", "前期", "前中期", "前中期节奏", "中后期", "后期"];
   const prioritySet = new Set(PRIORITY_TAGS);
   const pinned = PRIORITY_TAGS.filter(tg => all.has(tg));
   const rest   = [...all].filter(tg => !prioritySet.has(tg));
@@ -1783,21 +1783,6 @@ function exportDefaultData() {
 }
 
 // ===== INIT =====
-// Hide the "Export Data" button in production — it's an authoring tool that
-// only makes sense when running the app off a local dev server (or file://).
-(function gateExportButton() {
-  const host = window.location.hostname;
-  const isLocal = window.location.protocol === 'file:'
-    || host === 'localhost'
-    || host === '127.0.0.1'
-    || host === '0.0.0.0'
-    || host.endsWith('.local');
-  if (!isLocal) {
-    const btn = document.getElementById('export-btn');
-    if (btn) btn.style.display = 'none';
-  }
-})();
-
 applyI18n();
 loadState();
 refreshStoredOverrides();
