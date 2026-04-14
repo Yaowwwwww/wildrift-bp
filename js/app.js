@@ -782,7 +782,7 @@ function buildCard(champ, mode) {
     const star = document.createElement('button');
     star.className = 'card-star' + (isStarred ? ' is-starred' : '');
     star.type = 'button';
-    star.textContent = isStarred ? '★' : '☆';
+    star.textContent = '★';
     star.title = isStarred ? t('unpin_title') : t('pin_title');
     star.addEventListener('click', (e) => {
       e.stopPropagation();
