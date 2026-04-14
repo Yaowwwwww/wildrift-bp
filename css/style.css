@@ -264,8 +264,8 @@ input  { font-family: inherit; }
 /* Checkmark badge — top-right corner */
 .card-badge {
   position: absolute;
-  top: 0px;
-  right: 7px;
+  top: 0;
+  right: 0;
   width: 16px;
   height: 16px;
   background: #fff;
@@ -282,8 +282,8 @@ input  { font-family: inherit; }
 /* Hollow checkbox — shown on hover for unselected champions (matches .card-badge size) */
 .card-badge-hollow {
   position: absolute;
-  top: 1.2px;
-  right: 7.7px;
+  top: 0;
+  right: 0;
   width: 16px;
   height: 16px;
   box-sizing: border-box;
@@ -301,8 +301,8 @@ input  { font-family: inherit; }
 /* Star (pin to front) button — top-left corner, same size as .card-badge */
 .card-star {
   position: absolute;
-  top: 1.2px;
-  left: 7.7px;
+  top: 0;
+  left: 0;
   width: 16px;
   height: 16px;
   padding: 0;
