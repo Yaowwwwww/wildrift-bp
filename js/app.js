@@ -36,6 +36,7 @@ const I18N = {
     hp_keywords: "Keywords",
     hp_no_tags: "No tags",
     hp_available: "Available",
+    hp_tag_search_ph: "Search tags...",
     hp_all_tags_added: "All tags added",
     hp_counters: "Counters",
     hp_no_counters: "No counters",
@@ -45,6 +46,29 @@ const I18N = {
     hp_synergy: "Synergy",
     hp_no_synergy: "None",
     export_btn: "Export Data",
+    sign_in: "Sign in",
+    sign_out: "Sign out",
+    auth_email_label: "Enter your email to receive a magic link:",
+    auth_send_link: "Send magic link",
+    auth_sending: "Sending…",
+    auth_check_inbox: "Check your inbox for the sign-in link.",
+    auth_error_generic: "Sign-in failed",
+    auth_error_invalid_email: "Please enter a valid email address.",
+    auth_signed_in_as: "Signed in as",
+    auth_clear_local: "Also clear data on this device",
+    auth_delete_account: "Delete all my cloud data",
+    auth_delete_confirm: "Permanently delete your cloud data? Your local data is untouched.",
+    auth_deleted_ok: "Cloud data deleted.",
+    sync_saving: "Syncing…",
+    sync_saved: "Saved",
+    sync_error: "Sync error",
+    merge_title: "Sync your existing data",
+    merge_desc: "You have data on this device and in the cloud. Choose how to combine them (pool / tag edits / keywords):",
+    merge_local: "This device",
+    merge_cloud: "Cloud",
+    merge_union: "Merge (recommended)",
+    merge_use_cloud: "Use cloud, discard local",
+    merge_keep_local: "Keep local, overwrite cloud",
     hp_hint_comp_label: "Team Comp Keywords:",
     hp_hint_comp: '1.<span class="hp-kw">Tank</span> (Vision) 2.<span class="hp-kw">Early/Tempo</span> 3.<span class="hp-kw">Late/Hypercarry ADC</span> 4.<span class="hp-kw">Reaper/Assassin</span> 5. <span class="hp-kw">Control</span> (more the better)',
     hp_hint_chain_label: "Counter Chain (→ means counters):",
@@ -89,6 +113,7 @@ const I18N = {
     hp_keywords: "关键词",
     hp_no_tags: "暂无词条",
     hp_available: "可选",
+    hp_tag_search_ph: "搜索词条...",
     hp_all_tags_added: "所有词条已添加",
     hp_counters: "克制",
     hp_no_counters: "暂无克制记录",
@@ -98,6 +123,29 @@ const I18N = {
     hp_synergy: "配合",
     hp_no_synergy: "暂无配合记录",
     export_btn: "导出数据",
+    sign_in: "登录",
+    sign_out: "退出登录",
+    auth_email_label: "输入邮箱，我们会发送一条登录链接：",
+    auth_send_link: "发送登录链接",
+    auth_sending: "发送中…",
+    auth_check_inbox: "请查收邮件并点击登录链接",
+    auth_error_generic: "登录失败",
+    auth_error_invalid_email: "请输入正确的邮箱地址",
+    auth_signed_in_as: "已登录账号",
+    auth_clear_local: "同时清除本设备数据",
+    auth_delete_account: "删除我的云端数据",
+    auth_delete_confirm: "确定永久删除云端数据吗？本地数据不受影响。",
+    auth_deleted_ok: "云端数据已删除",
+    sync_saving: "同步中…",
+    sync_saved: "已同步",
+    sync_error: "同步失败",
+    merge_title: "合并数据",
+    merge_desc: "本设备和云端都有数据，请选择合并方式（英雄池 / 词条编辑 / 关键词）：",
+    merge_local: "本设备",
+    merge_cloud: "云端",
+    merge_union: "合并（推荐）",
+    merge_use_cloud: "使用云端，丢弃本地",
+    merge_keep_local: "保留本地，覆盖云端",
     hp_hint_comp_label: "阵容关键词推荐：",
     hp_hint_comp: '1.<span class="hp-kw">肉</span>（视野） 2.<span class="hp-kw">前期/节奏</span> 3.<span class="hp-kw">后期/大C射手</span> 4.<span class="hp-kw">收割/刺客</span> 5. <span class="hp-kw">控制</span>（越多越好）',
     hp_hint_chain_label: "通用克制链（→表示克制）：",
@@ -183,6 +231,7 @@ function applyI18n() {
   });
   document.title = t('page_title');
   document.documentElement.setAttribute('lang', currentLang === 'en' ? 'en' : 'zh');
+  if (window.WRSync && window.WRSync.renderAuthButton) window.WRSync.renderAuthButton();
 }
 
 function setLanguage(lang) {
@@ -426,7 +475,49 @@ function saveState() {
     champData: state.champData,
     extraTags: state.extraTags || []
   }));
+  if (window.WRSync && window.WRSync.schedulePush) window.WRSync.schedulePush();
 }
+
+// ===== SYNC INTEGRATION ===========================================
+// Called by js/sync.js. Returns a plain-object snapshot of the user's
+// personal state (Sets flattened to arrays) suitable for upsert.
+window.getSyncableState = function () {
+  return {
+    pool:      [...state.pool],
+    junglers:  [...state.junglers],
+    starred:   [...state.starred],
+    champData: state.champData || {},
+    extraTags: state.extraTags || []
+  };
+};
+
+// Replace local state with a pulled snapshot from the cloud.
+// The sync layer sets an internal flag around this call so that the
+// saveState() it triggers doesn't echo back to the server.
+window.setStateFromSync = function (s) {
+  if (!s) return;
+  state.pool      = new Set(s.pool      || []);
+  state.junglers  = new Set(s.junglers  || []);
+  state.starred   = new Set(s.starred   || []);
+  state.champData = s.champData || {};
+  state.extraTags = s.extraTags || [];
+  saveState();
+  rerenderCurrentView();
+};
+
+// Re-read localStorage after a sibling tab wrote to it (cross-tab sync).
+window.reloadStateFromStorage = function () {
+  loadState();
+  rerenderCurrentView();
+};
+
+// Hard reset used by "Sign out + clear this device's data".
+window.clearLocalStateAndReset = function () {
+  localStorage.removeItem(STATE_STORAGE_KEY);
+  state = createEmptyState();
+  rerenderCurrentView();
+};
+// ==================================================================
 
 // ===== SCREEN ROUTING =====
 function showScreen(id) {
@@ -500,9 +591,18 @@ function buildKeywordChips() {
   };
   container.appendChild(allBtn);
 
-  [...all].forEach(tag => {
+  // Priority keywords — pinned at front (right after "All") and visually highlighted.
+  const PRIORITY_TAGS = ["控制", "肉", "打肉", "前期", "后期"];
+  const prioritySet = new Set(PRIORITY_TAGS);
+  const pinned = PRIORITY_TAGS.filter(tg => all.has(tg));
+  const rest   = [...all].filter(tg => !prioritySet.has(tg));
+
+  [...pinned, ...rest].forEach(tag => {
     const btn = document.createElement('button');
-    btn.className = 'kw-chip' + (activeKeywords.has(tag) ? ' active' : '');
+    const isPinned = prioritySet.has(tag);
+    btn.className = 'kw-chip'
+      + (isPinned ? ' kw-chip-priority' : '')
+      + (activeKeywords.has(tag) ? ' active' : '');
     btn.textContent = displayTag(tag);
     btn.onclick = () => {
       if (activeKeywords.has(tag)) activeKeywords.delete(tag);
@@ -791,6 +891,7 @@ function togglePool(id) {
 // ===== INTERACTIVE HOVER PANEL =====
 const tooltipEl = document.getElementById('tooltip');
 let hpTagPickerOpen      = false;
+let hpTagPickerQuery     = '';
 let hpCounterSearchOpen  = false;
 let hpBeCounterSearchOpen = false;
 let hpSynergySearchOpen  = false;
@@ -917,17 +1018,25 @@ function renderHoverPanel(champId) {
     tagsHtml += `<div class="hp-empty">${t('hp_no_tags')}</div>`;
   }
   if (hpTagPickerOpen) {
-    const available = [...allKeywordTags()].filter(tg => !tags.includes(tg));
+    const unused = [...allKeywordTags()].filter(tg => !tags.includes(tg));
+    const q = (hpTagPickerQuery || '').toLowerCase().trim();
+    const available = q ? unused.filter(tg => tagMatchesQuery(tg, q)) : unused;
     tagsHtml += '<div class="hp-tag-picker-divider"></div>';
     tagsHtml += `<div class="hp-picker-label">${t('hp_available')}</div>`;
+    tagsHtml += `<input type="text" class="hp-tag-search" id="hp-tag-search"
+      placeholder="${t('hp_tag_search_ph')}" value="${hpTagPickerQuery.replace(/"/g, '&quot;')}"
+      oninput="hpFilterTagPicker(this.value)"
+      onclick="event.stopPropagation()">`;
     if (available.length > 0) {
       tagsHtml += '<div class="hp-tag-picker">';
       available.forEach(tg => {
         tagsHtml += `<button class="hp-tag-option" onclick="hpAddTag('${champId}','${tg}')">${displayTag(tg)}</button>`;
       });
       tagsHtml += '</div>';
-    } else {
+    } else if (unused.length === 0) {
       tagsHtml += `<div class="hp-empty">${t('hp_all_tags_added')}</div>`;
+    } else {
+      tagsHtml += `<div class="hp-empty">${t('no_match')}</div>`;
     }
   }
 
@@ -1025,7 +1134,11 @@ function renderHoverPanel(champId) {
     <div class="hp-section">${synHtml}</div>
   `;
 
-  const focusId = hpCounterSearchOpen ? 'hp-counter-search' : hpBeCounterSearchOpen ? 'hp-be-counter-search' : hpSynergySearchOpen ? 'hp-synergy-search' : null;
+  const focusId = hpCounterSearchOpen ? 'hp-counter-search'
+    : hpBeCounterSearchOpen ? 'hp-be-counter-search'
+    : hpSynergySearchOpen ? 'hp-synergy-search'
+    : (hpTagPickerOpen && !hpTagPickerQuery) ? 'hp-tag-search'
+    : null;
   if (focusId) { const inp = document.getElementById(focusId); if (inp) setTimeout(() => inp.focus(), 30); }
 
   // re-position after content change
@@ -1040,7 +1153,42 @@ function toggleHpTagPicker() {
   hpCounterSearchOpen   = false;
   hpBeCounterSearchOpen = false;
   hpSynergySearchOpen   = false;
+  if (!hpTagPickerOpen) hpTagPickerQuery = '';
   renderHoverPanel(currentCardPanelId);
+}
+
+// Update filter query and rebuild only the available-tags list in place,
+// so the text input keeps focus and caret position without a full re-render.
+function hpFilterTagPicker(query) {
+  hpTagPickerQuery = query || '';
+  if (!currentCardPanelId) return;
+  const q = hpTagPickerQuery.toLowerCase().trim();
+  const data = getEffectiveChampData(currentCardPanelId);
+  const tags = data.tags || [];
+  const unused = [...allKeywordTags()].filter(tg => !tags.includes(tg));
+  const available = q ? unused.filter(tg => tagMatchesQuery(tg, q)) : unused;
+
+  // Replace the picker grid (or the "no match" / "all added" empty state)
+  const input = document.getElementById('hp-tag-search');
+  if (!input) return;
+  let next = input.nextElementSibling;
+  while (next && (next.classList.contains('hp-tag-picker') || next.classList.contains('hp-empty'))) {
+    const toRemove = next;
+    next = next.nextElementSibling;
+    toRemove.remove();
+  }
+  const champId = currentCardPanelId;
+  let html = '';
+  if (available.length > 0) {
+    html = '<div class="hp-tag-picker">' +
+      available.map(tg => `<button class="hp-tag-option" onclick="hpAddTag('${champId}','${tg}')">${displayTag(tg)}</button>`).join('') +
+      '</div>';
+  } else if (unused.length === 0) {
+    html = `<div class="hp-empty">${t('hp_all_tags_added')}</div>`;
+  } else {
+    html = `<div class="hp-empty">${t('no_match')}</div>`;
+  }
+  input.insertAdjacentHTML('afterend', html);
 }
 
 function toggleHpCounterSearch() {
@@ -1074,6 +1222,7 @@ function hpAddTag(champId, tag) {
     saveState();
   }
   hpTagPickerOpen = false;
+  hpTagPickerQuery = '';
   renderHoverPanel(champId);
 }
 
@@ -1598,6 +1747,21 @@ function exportDefaultData() {
 }
 
 // ===== INIT =====
+// Hide the "Export Data" button in production — it's an authoring tool that
+// only makes sense when running the app off a local dev server (or file://).
+(function gateExportButton() {
+  const host = window.location.hostname;
+  const isLocal = window.location.protocol === 'file:'
+    || host === 'localhost'
+    || host === '127.0.0.1'
+    || host === '0.0.0.0'
+    || host.endsWith('.local');
+  if (!isLocal) {
+    const btn = document.getElementById('export-btn');
+    if (btn) btn.style.display = 'none';
+  }
+})();
+
 applyI18n();
 loadState();
 refreshStoredOverrides();
