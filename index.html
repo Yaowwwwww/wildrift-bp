@@ -19,14 +19,6 @@
     </div>
     <span class="title-version" data-i18n="title_version">游戏版本：7.1a &nbsp; 最新英雄：奎桑提 &nbsp; Author: 长风, 梨花</span>
     <div class="header-right">
-      <div id="data-toggle" class="data-toggle" role="group" aria-label="Data source">
-        <button class="data-toggle-btn active" type="button" onclick="setDataMode(false)">
-          <span data-i18n="data_default">默认数据</span>
-        </button>
-        <button class="data-toggle-btn" type="button" onclick="setDataMode(true)">
-          <span data-i18n="data_personal">个人数据</span>
-        </button>
-      </div>
       <button id="lang-toggle" class="lang-toggle" onclick="toggleLanguage()" type="button" aria-label="Switch language">
         <span class="lang-label lang-label-en">EN</span>
         <span class="lang-track"><span class="lang-knob"><span class="lang-flag lang-flag-en">🇺🇸</span><span class="lang-flag lang-flag-cn">🇨🇳</span></span></span>
@@ -59,6 +51,11 @@
       oninput="onAddSearch()"
     >
     <button class="btn-clear-search" id="btn-clear-search" onclick="clearAddSearch()" data-i18n-title="clear_search" title="清除搜索">✕</button>
+  </div>
+  <div class="tagline-wrap">
+    <span class="tagline-line"></span>
+    <span class="tagline-text" data-i18n="tagline">根据你的理解修改出属于自己的BP宝典！</span>
+    <span class="tagline-line"></span>
   </div>
   <div id="add-selected-label" class="add-selected-label hidden" data-i18n="my_pool">我的英雄池</div>
   <div id="add-grid" class="champ-grid"></div>

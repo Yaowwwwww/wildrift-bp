@@ -7,10 +7,6 @@ const I18N = {
     page_title: "Wild Rift Picking System",
     title_desc: "Click champions to add to your pool, check traits to patch team gaps, use counters in BP to avoid being pressured / to pressure opponents",
     title_version: "Patch: 7.1a &nbsp; Latest Champion: K'Sante &nbsp; Author: 长风入萧曲悠扬，梨花梦中烟消散",
-    local_dev_only: "Local dev only",
-    use_personal_data: "Use personal data",
-    data_default: "Default",
-    data_personal: "Personal",
     lane_all: "All",
     lane_baron: "Baron",
     lane_jungle: "Jungle",
@@ -22,6 +18,7 @@ const I18N = {
     search_ph: "Search champion / tag...",
     clear_search: "Clear search",
     my_pool: "My Champion Pool",
+    tagline: "Craft your own BP codex, shaped by your understanding!",
     back_to_top: "Back to top",
     btn_back: "← Back",
     pool_search_ph: "Search champion / tag (e.g. tank, counter, carry)...",
@@ -59,10 +56,6 @@ const I18N = {
     page_title: "LOL手游英雄选择系统",
     title_desc: "点击英雄可以加入自己的英雄池，查看特性来补阵容缺陷，克制关系BP避免对位压制/实现压制",
     title_version: "游戏版本：7.1a &nbsp; 最新英雄：奎桑提 &nbsp; Author: 长风, 梨花",
-    local_dev_only: "仅本地开发环境可见",
-    use_personal_data: "使用个人数据",
-    data_default: "默认数据",
-    data_personal: "个人数据",
     lane_all: "全部",
     lane_baron: "上单",
     lane_jungle: "打野",
@@ -74,6 +67,7 @@ const I18N = {
     search_ph: "搜索英雄 / 词条...",
     clear_search: "清除搜索",
     my_pool: "我的英雄池",
+    tagline: "根据你的理解修改出属于自己的BP宝典！",
     back_to_top: "回到顶部",
     btn_back: "← 返回",
     pool_search_ph: "搜索英雄 / 词条（如：肉、针对、收割）...",
@@ -219,21 +213,40 @@ let state = {
 };
 
 let currentAddLane    = 'all';
-let activeKeyword     = null;   // currently selected keyword chip
+let activeKeywords    = new Set();   // currently selected keyword chips (multi-select, AND filter)
 let editingChampId    = null;
 let junglerOn         = false;
 let kwPanelOpen       = false;
 let currentCardPanelId = null;
-let usePersonalData   = false;
-const LEGACY_STATE_STORAGE_KEY = 'wr-bp-v1';
+const STATE_STORAGE_KEY = 'wr-bp-default-v1';
 
-function isLocalDevEnvironment() {
-  const host = window.location.hostname;
-  return window.location.protocol === 'file:' ||
-    host === 'localhost' ||
-    host === '127.0.0.1' ||
-    host === '0.0.0.0' ||
-    host.endsWith('.local');
+// Champions whose portrait art has the face too small — zoom 2x and center-crop
+const ZOOM_2X_CHAMPS = new Set([
+  'Jax', 'Mordekaiser', 'Maokai', 'Fiddlesticks',
+  'Vladimir', 'Zyra', 'Teemo', 'Shyvana'
+]);
+
+// Per-champion pixel offsets applied on top of the 2x zoom, to re-center the face.
+// Positive y = shift content down; positive x = shift content right.
+const ZOOM_OFFSETS = {
+  Vladimir:    { x: -6,  y: 8 },
+  Mordekaiser: { x: 4,   y: 16 },
+  Maokai:      { x: -10, y: 0 },
+  Jax:         { x: -4,  y: 8 },
+};
+
+// Champions whose art should be mirrored horizontally.
+const FLIP_CHAMPS = new Set(['Camille']);
+
+function buildChampImgTransform(champId) {
+  const parts = [];
+  if (ZOOM_2X_CHAMPS.has(champId)) {
+    parts.push('scale(2)');
+    const off = ZOOM_OFFSETS[champId];
+    if (off) parts.push(`translate(${off.x}px, ${off.y}px)`);
+  }
+  if (FLIP_CHAMPS.has(champId)) parts.push('scaleX(-1)');
+  return parts.join(' ');
 }
 
 function hasOwn(obj, key) {
@@ -279,16 +292,6 @@ function getDefaultChampData() {
   return seed;
 }
 
-function getPersonalChampData() {
-  // Personal mode is a truly blank slate — no author/default seeding.
-  // Users build their own tags and counter relationships from scratch.
-  return {};
-}
-
-function getBaseChampData() {
-  return usePersonalData ? getPersonalChampData() : getDefaultChampData();
-}
-
 function createEmptyState() {
   return {
     pool: new Set(),
@@ -299,17 +302,13 @@ function createEmptyState() {
   };
 }
 
-function getStateStorageKey() {
-  return usePersonalData ? 'wr-bp-personal-v1' : 'wr-bp-default-v1';
-}
-
 function getEffectiveChampData(champId) {
   if (hasOwn(state.champData, champId)) return state.champData[champId];
-  return getBaseChampData()[champId] || { tags: [], counters: [] };
+  return getDefaultChampData()[champId] || { tags: [], counters: [] };
 }
 
 function getEffectiveChampDataMap() {
-  const map = getBaseChampData();
+  const map = getDefaultChampData();
   Object.keys(state.champData).forEach(id => {
     map[id] = cloneChampDatum(state.champData[id]);
   });
@@ -326,7 +325,7 @@ function ensureChampDataOverride(champId) {
   return state.champData[champId];
 }
 
-function normalizeStoredChampData(rawChampData, baseData = getBaseChampData()) {
+function normalizeStoredChampData(rawChampData, baseData = getDefaultChampData()) {
   const normalized = {};
 
   Object.keys(rawChampData || {}).forEach(id => {
@@ -357,63 +356,32 @@ function rerenderCurrentView() {
 }
 
 function refreshStoredOverrides() {
-  state.champData = normalizeStoredChampData(state.champData, getBaseChampData());
+  state.champData = normalizeStoredChampData(state.champData, getDefaultChampData());
   saveState();
 }
 
-function updateDataToggleUI() {
-  const buttons = document.querySelectorAll('#data-toggle .data-toggle-btn');
-  if (buttons.length < 2) return;
-  buttons[0].classList.toggle('active', !usePersonalData);
-  buttons[1].classList.toggle('active',  usePersonalData);
-}
-
-function setDataMode(personal) {
-  personal = !!personal;
-  if (personal === usePersonalData) return;
-
-  // Persist current mode's state, then switch
-  saveState();
-  usePersonalData = personal;
-  localStorage.setItem('wr-bp-use-personal-data', usePersonalData ? 'true' : 'false');
-  loadState();
-  refreshStoredOverrides();
-
-  // Clear undo history — different data context
-  undoStack.length = 0;
-  redoStack.length = 0;
-
-  updateDataToggleUI();
-  rerenderCurrentView();
-}
-
-function initDataModeToggle() {
-  // One-time migration: the personal-mode semantics changed from
-  // "default + overlay" to a truly blank slate. Any stale data saved under
-  // the old scheme (or the older global v1 key) would leak default content
-  // into the new blank-slate personal mode, so wipe it on first run.
-  const MIGRATION_KEY = 'wr-bp-personal-reset-v2';
-  if (localStorage.getItem(MIGRATION_KEY) !== 'done') {
-    localStorage.removeItem('wr-bp-personal-v1');
-    localStorage.removeItem(LEGACY_STATE_STORAGE_KEY);
-    localStorage.setItem(MIGRATION_KEY, 'done');
-  }
-
-  usePersonalData = localStorage.getItem('wr-bp-use-personal-data') === 'true';
-  updateDataToggleUI();
-}
+// One-time cleanup of keys from the abandoned Default/Personal toggle era.
+(function migrateLegacyKeys() {
+  const MIGRATION_KEY = 'wr-bp-toggle-removed-v1';
+  if (localStorage.getItem(MIGRATION_KEY) === 'done') return;
+  localStorage.removeItem('wr-bp-personal-v1');
+  localStorage.removeItem('wr-bp-use-personal-data');
+  localStorage.removeItem('wr-bp-v1');
+  localStorage.removeItem('wr-bp-personal-reset-v2');
+  localStorage.setItem(MIGRATION_KEY, 'done');
+})();
 
 // ===== PERSISTENCE =====
 function loadState() {
   state = createEmptyState();
   try {
-    const raw = localStorage.getItem(getStateStorageKey());
+    const raw = localStorage.getItem(STATE_STORAGE_KEY);
     if (raw) {
       const parsed = JSON.parse(raw);
       state.pool       = new Set(parsed.pool      || []);
       state.junglers   = new Set(parsed.junglers  || []);
       state.starred    = new Set(parsed.starred   || []);
-      state.champData  = normalizeStoredChampData(parsed.champData || {}, getBaseChampData());
+      state.champData  = normalizeStoredChampData(parsed.champData || {}, getDefaultChampData());
       state.extraTags  = parsed.extraTags  || [];
     }
   } catch (e) { /* ignore */ }
@@ -428,7 +396,7 @@ function loadState() {
 }
 
 function saveState() {
-  localStorage.setItem(getStateStorageKey(), JSON.stringify({
+  localStorage.setItem(STATE_STORAGE_KEY, JSON.stringify({
     pool:      [...state.pool],
     junglers:  [...state.junglers],
     starred:   [...state.starred],
@@ -499,10 +467,10 @@ function buildKeywordChips() {
 
   // "All" reset chip
   const allBtn = document.createElement('button');
-  allBtn.className = 'kw-chip kw-chip-all' + (!activeKeyword ? ' active' : '');
+  allBtn.className = 'kw-chip kw-chip-all' + (activeKeywords.size === 0 ? ' active' : '');
   allBtn.textContent = t('kw_all');
   allBtn.onclick = () => {
-    activeKeyword = null;
+    activeKeywords.clear();
     updateClearBtn();
     buildKeywordChips();
     renderAddGrid();
@@ -511,10 +479,11 @@ function buildKeywordChips() {
 
   [...all].forEach(tag => {
     const btn = document.createElement('button');
-    btn.className = 'kw-chip' + (activeKeyword === tag ? ' active' : '');
+    btn.className = 'kw-chip' + (activeKeywords.has(tag) ? ' active' : '');
     btn.textContent = displayTag(tag);
     btn.onclick = () => {
-      activeKeyword = (activeKeyword === tag) ? null : tag;
+      if (activeKeywords.has(tag)) activeKeywords.delete(tag);
+      else activeKeywords.add(tag);
       updateClearBtn();
       buildKeywordChips();
       renderAddGrid();
@@ -569,9 +538,9 @@ function switchAddLane(lane) {
 }
 
 function onAddSearch() {
-  // Clear active keyword when typing
+  // Clear active keywords when typing
   if (document.getElementById('add-search').value) {
-    activeKeyword = null;
+    activeKeywords.clear();
     buildKeywordChips();
   }
   updateClearBtn();
@@ -580,7 +549,7 @@ function onAddSearch() {
 
 function clearAddSearch() {
   document.getElementById('add-search').value = '';
-  activeKeyword = null;
+  activeKeywords.clear();
   updateClearBtn();
   buildKeywordChips();
   renderAddGrid();
@@ -590,7 +559,7 @@ function updateClearBtn() {
   const input = document.getElementById('add-search');
   const btn   = document.getElementById('btn-clear-search');
   if (!btn) return;
-  btn.style.display = (input.value || activeKeyword) ? 'flex' : 'none';
+  btn.style.display = (input.value || activeKeywords.size > 0) ? 'flex' : 'none';
 }
 
 // ===== RENDER ADD GRID =====
@@ -607,10 +576,13 @@ function renderAddGrid() {
     champs = champs.filter(c => laneIds.has(c.id));
   }
 
-  if (activeKeyword) {
+  if (activeKeywords.size > 0) {
     champs = champs.filter(c => {
       const tags = getEffectiveChampData(c.id).tags || [];
-      return tags.includes(activeKeyword);
+      for (const kw of activeKeywords) {
+        if (!tags.includes(kw)) return false;
+      }
+      return true;
     });
   } else if (query) {
     champs = champs.filter(c => champMatchesQuery(c, query));
@@ -652,6 +624,13 @@ function buildCard(champ, mode) {
   img.alt   = champ.name;
   img.addEventListener('error', () => { img.src = PLACEHOLDER_IMG; });
 
+  const imgWrap = document.createElement('div');
+  imgWrap.className = 'champ-img-wrap';
+  if (ZOOM_2X_CHAMPS.has(champ.id)) imgWrap.classList.add('zoom-2x');
+  const xform = buildChampImgTransform(champ.id);
+  if (xform) img.style.transform = xform;
+  imgWrap.appendChild(img);
+
   const name = document.createElement('div');
   name.className = 'champ-name';
   if (champ.zhName) {
@@ -660,7 +639,7 @@ function buildCard(champ, mode) {
     name.textContent = champ.name;
   }
 
-  card.appendChild(img);
+  card.appendChild(imgWrap);
   card.appendChild(name);
 
   if (mode === 'add' && inPool) {
@@ -838,8 +817,11 @@ function showHoverPanel(champ, cardEl) {
 }
 
 function positionHoverPanel(cardEl) {
-  const img = cardEl.querySelector('img');
-  const ref = img ? img.getBoundingClientRect() : cardEl.getBoundingClientRect();
+  // Align to the img-wrap (the visible bordered square), not the inner <img>,
+  // so the hover panel aligns to the card's actual image border instead of
+  // shifting 1–2px inward when the highlight border thickens.
+  const anchor = cardEl.querySelector('.champ-img-wrap') || cardEl.querySelector('img');
+  const ref = anchor ? anchor.getBoundingClientRect() : cardEl.getBoundingClientRect();
   const pw  = tooltipEl.offsetWidth  || 230;
 
   // Always show below the card
@@ -1133,7 +1115,8 @@ function hpRemoveBeCounter(champId, sourceId) {
 // Click a tag → activate keyword filter and show matching champions
 function hpClickTag(tag) {
   hideHoverPanel();
-  activeKeyword = tag;
+  activeKeywords.clear();
+  activeKeywords.add(tag);
   document.getElementById('add-search').value = '';
   currentAddLane = 'all';
   updateClearBtn();
@@ -1147,7 +1130,7 @@ function hpClickTag(tag) {
 // Click a champion avatar → clear filters, scroll to their card, show their hover
 function hpNavigateToChamp(champId) {
   hideHoverPanel();
-  activeKeyword = null;
+  activeKeywords.clear();
   document.getElementById('add-search').value = '';
   currentAddLane = 'all';
   updateClearBtn();
@@ -1409,6 +1392,14 @@ document.addEventListener('click', e => {
   }
 });
 
+// Hide hover panel on ANY click outside the tooltip itself.
+// Covers keyword chips, lane tabs, champion cards, toggles, etc.
+document.addEventListener('click', e => {
+  if (tooltipEl && !tooltipEl.contains(e.target)) {
+    hideHoverPanel();
+  }
+}, true);
+
 // ===== BACK TO TOP BUTTON =====
 function scrollAddGridToTop() {
   const grid = document.getElementById('add-grid');
@@ -1427,7 +1418,6 @@ function scrollAddGridToTop() {
 })();
 
 // ===== INIT =====
-initDataModeToggle();
 applyI18n();
 loadState();
 refreshStoredOverrides();

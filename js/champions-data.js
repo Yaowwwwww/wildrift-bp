@@ -15,9 +15,24 @@ const DDRAGON_ID_MAP = {
   Wukong: "MonkeyKing",
 };
 
-// Per-champion image overrides (WR-exclusive champions with no DDragon asset)
+// Per-champion image overrides (WR-exclusive champions with no DDragon asset,
+// or champions whose PC DDragon art we want to replace with Wild Rift art)
 const CHAMPION_ICON_OVERRIDES = {
-  Norra: "https://www.wildriftfire.com/images/champion/icon/norra.png",
+  Norra:        "https://www.wildriftfire.com/images/champion/icon/norra.png",
+  XinZhao:      "assets/champions/xin-zhao.jpg",
+  Zyra:         "assets/champions/zyra.jpg",
+  Teemo:        "assets/champions/teemo.jpg",
+  Jax:          "assets/champions/jax.jpg",
+  Maokai:       "assets/champions/maikai.jpg",
+  Vladimir:     "assets/champions/vladimir.jpg",
+  Fiddlesticks: "assets/champions/fiddlesticks.jpg",
+  Leona:        "assets/champions/leona.jpg",
+  Mordekaiser:  "assets/champions/mordekaiser.jpg",
+  Shyvana:      "assets/champions/shyvana.jpg",
+  Soraka:       "assets/champions/soraka.jpg",
+  Zilean:       "assets/champions/zilean.jpg",
+  Nautilus:     "assets/champions/Nautilus.jpg",
+  Nidalee:      "assets/champions/nidalee.jpg",
 };
 
 function getChampionIcon(id, wrOnly) {
@@ -101,7 +116,7 @@ const ALL_CHAMPIONS = [
   { id: "Caitlyn",      name: "Caitlyn",       zhName: "凯特琳" },
   { id: "Camille",      name: "Camille",       zhName: "卡蜜尔" },
   { id: "Corki",        name: "Corki",         zhName: "科基（飞机）" },
-  { id: "Darius",       name: "Darius",        zhName: "德莱厄斯" },
+  { id: "Darius",       name: "Darius",        zhName: "德莱厄斯（诺手）" },
   { id: "Diana",        name: "Diana",         zhName: "戴安娜（皎月）" },
   { id: "DrMundo",      name: "Dr. Mundo",     zhName: "蒙多医生" },
   { id: "Draven",       name: "Draven",        zhName: "德莱文" },
@@ -122,7 +137,7 @@ const ALL_CHAMPIONS = [
   { id: "Irelia",       name: "Irelia",        zhName: "艾瑞利亚（刀妹）" },
   { id: "Janna",        name: "Janna",         zhName: "珍娜（风女）" },
   { id: "JarvanIV",     name: "Jarvan IV",     zhName: "嘉文四世（皇子）" },
-  { id: "Jax",          name: "Jax",           zhName: "贾克斯" },
+  { id: "Jax",          name: "Jax",           zhName: "贾克斯（武器大师）" },
   { id: "Jayce",        name: "Jayce",         zhName: "杰斯" },
   { id: "Jhin",         name: "Jhin",          zhName: "烬" },
   { id: "Jinx",         name: "Jinx",          zhName: "金克丝" },
