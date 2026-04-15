@@ -931,14 +931,25 @@ function buildCard(champ, mode) {
   // Interactive hover panel
   attachHoverPanel(card, champ);
 
-  // Click
+  // Click — but if the hover panel is currently showing for THIS card,
+  // the first click dismisses the hover panel instead of toggling pool/opening modal.
   if (mode === 'add') {
     card.addEventListener('click', () => {
+      if (hpSourceCard === card && !tooltipEl.classList.contains('hidden')) {
+        hideHoverPanel();
+        return;
+      }
       togglePool(champ.id);
       renderAddGrid();
     });
   } else {
-    card.addEventListener('click', () => openModal(champ.id));
+    card.addEventListener('click', () => {
+      if (hpSourceCard === card && !tooltipEl.classList.contains('hidden')) {
+        hideHoverPanel();
+        return;
+      }
+      openModal(champ.id);
+    });
   }
 
   return card;
@@ -1032,6 +1043,8 @@ let hpBeCounterSearchOpen = false;
 let hpSynergySearchOpen  = false;
 let hpTimeout            = null;
 let hpShowTimeout        = null;
+let hpScrolling          = false;   // true while user is scrolling; blocks new hover triggers
+let hpScrollSettleTimer  = null;
 let hpLocked             = false;   // suppresses all hover during navigation
 let hpLockTimer          = null;
 let hpSourceCard         = null;    // the card that triggered the current panel
@@ -1045,7 +1058,8 @@ function allKeywordTags() {
 
 function attachHoverPanel(el, champ) {
   el.addEventListener('mouseenter', () => {
-    if (hpLocked) return; // fully suppressed during navigation
+    if (hpLocked) return;        // fully suppressed during navigation
+    if (hpScrolling) return;     // don't trigger hover while scrolling (esp. mobile)
     clearTimeout(hpTimeout);
     clearTimeout(hpShowTimeout);
     hpShowTimeout = setTimeout(() => showHoverPanel(champ, el), 300);
@@ -1097,21 +1111,32 @@ function positionHoverPanel(cardEl) {
   tooltipEl.style.top  = top  + 'px';
 }
 
-// Reposition hover panel on scroll so it follows the source card (desktop).
-// On touch devices, scrolling should dismiss the hover panel entirely —
-// following it while the user is swiping feels laggy and gets in the way.
 const isTouchDevice = window.matchMedia && window.matchMedia('(hover: none)').matches;
+
+// Mark scrolling state + suppress any new hover for 300ms after last scroll.
+// Also: on desktop follow the card; on touch, dismiss panel + cancel pending show.
+function markScrolling() {
+  hpScrolling = true;
+  clearTimeout(hpShowTimeout);        // cancel any pending delayed show
+  clearTimeout(hpScrollSettleTimer);
+  hpScrollSettleTimer = setTimeout(() => { hpScrolling = false; }, 300);
+}
+
 document.addEventListener('scroll', () => {
+  markScrolling();
   if (!hpSourceCard || tooltipEl.classList.contains('hidden')) return;
   if (isTouchDevice) hideHoverPanel();
   else positionHoverPanel(hpSourceCard);
 }, { passive: true, capture: true });
 
-// Touch devices also fire touchmove on finger drag — dismiss the panel so
-// it doesn't linger while the user is scrolling.
+// Touch devices: touchmove dismisses the panel and suppresses new triggers
 document.addEventListener('touchmove', () => {
+  markScrolling();
   if (hpSourceCard && !tooltipEl.classList.contains('hidden')) hideHoverPanel();
 }, { passive: true });
+
+// Wheel scrolling on desktop also counts — suppress hover trigger during wheel
+document.addEventListener('wheel', markScrolling, { passive: true });
 
 function hideHoverPanel() {
   tooltipEl.classList.add('hidden');
@@ -1799,11 +1824,13 @@ document.addEventListener('click', e => {
 });
 
 // Hide hover panel on ANY click outside the tooltip itself.
-// Covers keyword chips, lane tabs, champion cards, toggles, etc.
+// Covers keyword chips, lane tabs, toggles, etc.
+// Exception: champion cards handle their own dismiss (first tap closes the
+// panel, second tap toggles pool). Skip the card case here.
 document.addEventListener('click', e => {
-  if (tooltipEl && !tooltipEl.contains(e.target)) {
-    hideHoverPanel();
-  }
+  if (!tooltipEl || tooltipEl.contains(e.target)) return;
+  if (e.target.closest && e.target.closest('.champ-card')) return;
+  hideHoverPanel();
 }, true);
 
 // ===== BACK TO TOP BUTTON =====
