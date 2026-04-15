@@ -1098,12 +1098,21 @@ function positionHoverPanel(cardEl) {
   tooltipEl.style.top  = top  + 'px';
 }
 
-// Reposition hover panel on scroll so it follows the source card
+// Reposition hover panel on scroll so it follows the source card (desktop).
+// On touch devices, scrolling should dismiss the hover panel entirely —
+// following it while the user is swiping feels laggy and gets in the way.
+const isTouchDevice = window.matchMedia && window.matchMedia('(hover: none)').matches;
 document.addEventListener('scroll', () => {
-  if (hpSourceCard && !tooltipEl.classList.contains('hidden')) {
-    positionHoverPanel(hpSourceCard);
-  }
+  if (!hpSourceCard || tooltipEl.classList.contains('hidden')) return;
+  if (isTouchDevice) hideHoverPanel();
+  else positionHoverPanel(hpSourceCard);
 }, { passive: true, capture: true });
+
+// Touch devices also fire touchmove on finger drag — dismiss the panel so
+// it doesn't linger while the user is scrolling.
+document.addEventListener('touchmove', () => {
+  if (hpSourceCard && !tooltipEl.classList.contains('hidden')) hideHoverPanel();
+}, { passive: true });
 
 function hideHoverPanel() {
   tooltipEl.classList.add('hidden');
