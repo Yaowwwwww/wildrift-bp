@@ -815,12 +815,22 @@ function renderAddGrid() {
 function togglePoolFilter() {
   const el = document.getElementById('filter-pool-only');
   filterPoolOnly = !!(el && el.checked);
+  if (filterPoolOnly) {
+    filterStarredOnly = false;
+    const other = document.getElementById('filter-starred-only');
+    if (other) other.checked = false;
+  }
   renderAddGrid();
 }
 
 function toggleStarredFilter() {
   const el = document.getElementById('filter-starred-only');
   filterStarredOnly = !!(el && el.checked);
+  if (filterStarredOnly) {
+    filterPoolOnly = false;
+    const other = document.getElementById('filter-pool-only');
+    if (other) other.checked = false;
+  }
   renderAddGrid();
 }
 
