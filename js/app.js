@@ -275,13 +275,18 @@ function toggleLanguage() {
 })();
 
 // ===== STATE =====
+// Hardcoded priority keyword chips — pinned + highlighted by default.
+// Users can star/unstar individual chips to override this list per-device.
+const DEFAULT_PRIORITY_TAGS = ["控制", "肉", "打肉", "前期", "前中期", "前中期节奏", "中后期", "后期"];
+
 let state = {
-  pool:        new Set(),  // champion ids in user's pool
-  junglers:    new Set(),  // champion ids marked as jungler
-  starred:     new Set(),  // champion ids pinned to front
-  champData:   {},         // { [id]: { tags: string[], counters: string[] } }
-  extraTags:   [],         // user-created global keywords
-  starredTags: []          // keyword chips pinned as priority (union with PRIORITY_TAGS defaults)
+  pool:          new Set(),  // champion ids in user's pool
+  junglers:      new Set(),  // champion ids marked as jungler
+  starred:       new Set(),  // champion ids pinned to front
+  champData:     {},         // { [id]: { tags: string[], counters: string[] } }
+  extraTags:     [],         // user-created global keywords
+  starredTags:   [],         // user-added priority keyword chips
+  unstarredTags: []          // user-removed priority keyword chips (blacklist for DEFAULT_PRIORITY_TAGS)
 };
 
 let currentAddLane    = 'all';
@@ -387,7 +392,8 @@ function createEmptyState() {
     starred: new Set(),
     champData: {},
     extraTags: [],
-    starredTags: []
+    starredTags: [],
+    unstarredTags: []
   };
 }
 
@@ -472,8 +478,9 @@ function loadState() {
       state.junglers   = new Set(parsed.junglers  || []);
       state.starred    = new Set(parsed.starred   || []);
       state.champData  = normalizeStoredChampData(parsed.champData || {}, getDefaultChampData());
-      state.extraTags  = parsed.extraTags  || [];
-      state.starredTags = parsed.starredTags || [];
+      state.extraTags    = parsed.extraTags    || [];
+      state.starredTags  = parsed.starredTags  || [];
+      state.unstarredTags = parsed.unstarredTags || [];
     }
   } catch (e) { /* ignore */ }
 
@@ -488,12 +495,13 @@ function loadState() {
 
 function saveState() {
   localStorage.setItem(STATE_STORAGE_KEY, JSON.stringify({
-    pool:        [...state.pool],
-    junglers:    [...state.junglers],
-    starred:     [...state.starred],
-    champData:   state.champData,
-    extraTags:   state.extraTags || [],
-    starredTags: state.starredTags || []
+    pool:          [...state.pool],
+    junglers:      [...state.junglers],
+    starred:       [...state.starred],
+    champData:     state.champData,
+    extraTags:     state.extraTags || [],
+    starredTags:   state.starredTags || [],
+    unstarredTags: state.unstarredTags || []
   }));
   if (window.WRSync && window.WRSync.schedulePush) window.WRSync.schedulePush();
 }
@@ -503,12 +511,13 @@ function saveState() {
 // personal state (Sets flattened to arrays) suitable for upsert.
 window.getSyncableState = function () {
   return {
-    pool:        [...state.pool],
-    junglers:    [...state.junglers],
-    starred:     [...state.starred],
-    champData:   state.champData || {},
-    extraTags:   state.extraTags || [],
-    starredTags: state.starredTags || []
+    pool:          [...state.pool],
+    junglers:      [...state.junglers],
+    starred:       [...state.starred],
+    champData:     state.champData || {},
+    extraTags:     state.extraTags || [],
+    starredTags:   state.starredTags || [],
+    unstarredTags: state.unstarredTags || []
   };
 };
 
@@ -517,12 +526,13 @@ window.getSyncableState = function () {
 // saveState() it triggers doesn't echo back to the server.
 window.setStateFromSync = function (s) {
   if (!s) return;
-  state.pool        = new Set(s.pool      || []);
-  state.junglers    = new Set(s.junglers  || []);
-  state.starred     = new Set(s.starred   || []);
-  state.champData   = s.champData || {};
-  state.extraTags   = s.extraTags || [];
-  state.starredTags = s.starredTags || [];
+  state.pool          = new Set(s.pool      || []);
+  state.junglers      = new Set(s.junglers  || []);
+  state.starred       = new Set(s.starred   || []);
+  state.champData     = s.champData || {};
+  state.extraTags     = s.extraTags || [];
+  state.starredTags   = s.starredTags || [];
+  state.unstarredTags = s.unstarredTags || [];
   saveState();
   rerenderCurrentView();
 };
@@ -614,10 +624,13 @@ function buildKeywordChips() {
   };
   container.appendChild(allBtn);
 
-  // Priority keywords — hardcoded defaults + user-starred tags, pinned + highlighted.
-  const DEFAULT_PRIORITY_TAGS = ["控制", "肉", "打肉", "前期", "前中期", "前中期节奏", "中后期", "后期"];
+  // Priority = (DEFAULT_PRIORITY_TAGS − unstarred) ∪ starredTags
+  const unstarred = new Set(state.unstarredTags || []);
   const userStarred = state.starredTags || [];
-  const effectivePriority = [...DEFAULT_PRIORITY_TAGS, ...userStarred.filter(t => !DEFAULT_PRIORITY_TAGS.includes(t))];
+  const effectivePriority = [
+    ...DEFAULT_PRIORITY_TAGS.filter(t => !unstarred.has(t)),
+    ...userStarred.filter(t => !DEFAULT_PRIORITY_TAGS.includes(t))
+  ];
   const prioritySet = new Set(effectivePriority);
   const pinned = effectivePriority.filter(tg => all.has(tg));
   const rest   = [...all].filter(tg => !prioritySet.has(tg));
@@ -697,9 +710,22 @@ function createKeyword() {
 
 function toggleTagStarred(tag) {
   if (!state.starredTags) state.starredTags = [];
-  const i = state.starredTags.indexOf(tag);
-  if (i >= 0) state.starredTags.splice(i, 1);
-  else state.starredTags.push(tag);
+  if (!state.unstarredTags) state.unstarredTags = [];
+
+  const isDefault    = DEFAULT_PRIORITY_TAGS.includes(tag);
+  const inStarred    = state.starredTags.includes(tag);
+  const inUnstarred  = state.unstarredTags.includes(tag);
+  const currentlyStarred = inStarred || (isDefault && !inUnstarred);
+
+  if (currentlyStarred) {
+    // Un-star: remove from starredTags, and if it's a default, blacklist it
+    state.starredTags = state.starredTags.filter(t => t !== tag);
+    if (isDefault && !inUnstarred) state.unstarredTags.push(tag);
+  } else {
+    // Re-star: remove from blacklist first, then add to starredTags for non-defaults
+    state.unstarredTags = state.unstarredTags.filter(t => t !== tag);
+    if (!isDefault && !inStarred) state.starredTags.push(tag);
+  }
   saveState();
   buildKeywordChips();
 }

@@ -132,8 +132,9 @@ input  { font-family: inherit; }
   display: flex;
   align-items: center;
   gap: 14px;
-  margin: 16px 20px 4px;
-  padding: 14px 0;
+  margin: 0 20px;
+  padding: 28px 0;
+  border-bottom: 1px solid #2a2a2a;
   user-select: none;
 }
 .tagline-line {
@@ -141,16 +142,16 @@ input  { font-family: inherit; }
   height: 1px;
   background: linear-gradient(
     to right,
-    transparent,
-    rgba(240, 230, 140, 0.35) 30%,
-    rgba(240, 230, 140, 0.55) 50%,
-    rgba(240, 230, 140, 0.35) 70%,
-    transparent
+    transparent 0%,
+    rgba(240, 230, 140, 0.7) 12%,
+    rgba(240, 230, 140, 0.85) 50%,
+    rgba(240, 230, 140, 0.7) 88%,
+    transparent 100%
   );
 }
 .tagline-text {
   font-family: inherit;
-  font-size: 0.82rem;
+  font-size: calc(1rem + 5px);
   font-weight: 700;
   letter-spacing: 0.8px;
   color: #e8d88a;
@@ -1057,20 +1058,20 @@ input  { font-family: inherit; }
 }
 
 .add-selected-label {
-  padding: 4px 20px 12px;
-  font-size: 1.3rem;
+  padding: 22px 28px 10px;
+  font-size: 1.45rem;
   font-weight: 700;
-  color: #fff;
-  text-transform: uppercase;
-  letter-spacing: 3.5px;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+  color: #f5eac8;
+  font-family: 'Cormorant Garamond', 'Noto Serif SC', Georgia, 'Songti SC', serif;
+  letter-spacing: 3px;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.55);
 }
 
 /* Pool / starred filter checkboxes shown under "My Champion Pool" label */
 .pool-filters {
   display: flex;
   gap: 18px;
-  padding: 6px 20px 0;
+  padding: 4px 28px 0;
 }
 .pool-filter-check {
   display: inline-flex;
