@@ -731,7 +731,6 @@ function toggleTagStarred(tag) {
 }
 
 function deleteKeywordEverywhere(tag) {
-  if (!confirm(t('kw_delete_confirm'))) return;
   // Remove from user-created extra tags
   if (state.extraTags) state.extraTags = state.extraTags.filter(t => t !== tag);
   // Remove from starred tags
