@@ -633,7 +633,11 @@ function buildKeywordChips() {
   ];
   const prioritySet = new Set(effectivePriority);
   const pinned = effectivePriority.filter(tg => all.has(tg));
-  const rest   = [...all].filter(tg => !prioritySet.has(tg));
+  // Recently unstarred tags go right after pinned (they were important enough
+  // to be priority at some point), then everything else.
+  const recentlyUnstarred = (state.unstarredTags || []).filter(tg => all.has(tg) && !prioritySet.has(tg));
+  const recentlyUnstarredSet = new Set(recentlyUnstarred);
+  const rest = [...recentlyUnstarred, ...[...all].filter(tg => !prioritySet.has(tg) && !recentlyUnstarredSet.has(tg))];
 
   [...pinned, ...rest].forEach(tag => {
     const btn = document.createElement('button');
