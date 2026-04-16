@@ -93,7 +93,7 @@ const I18N = {
   cn: {
     page_title: "激斗峡谷 BP 系统",
     title_header: '激斗峡谷<span class="title-sep"></span>BP 系统',
-    title_desc: "点击英雄可以加入自己的英雄池，查看特性来补阵容缺陷，克制关系BP避免对位压制/实现压制",
+    title_desc: "点击英雄加入自己的英雄池，查看特性来补阵容缺陷，克制关系BP避免对位压制/实现压制",
     title_version: "游戏版本：7.1a &nbsp; 最新英雄：奎桑提 &nbsp; Author: 长风, 梨花",
     lane_all: "全部",
     lane_baron: "上单",
@@ -652,6 +652,8 @@ function buildKeywordChips() {
       + (isPinned ? ' kw-chip-priority' : '')
       + (activeKeywords.has(tag) ? ' active' : '');
     btn.innerHTML = `
+      <span class="kw-zone kw-zone-tl"></span>
+      <span class="kw-zone kw-zone-tr"></span>
       <span class="kw-chip-label">${displayTag(tag)}</span>
       <span class="kw-chip-star" title="${t('kw_star_toggle')}">★</span>
       <span class="kw-chip-x" title="${t('kw_delete')}">×</span>
