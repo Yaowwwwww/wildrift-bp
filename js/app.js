@@ -52,6 +52,9 @@ const I18N = {
     hp_synergy: "Synergy",
     hp_no_synergy: "None",
     export_btn: "Export Data",
+    import_btn: "Import Data",
+    import_success: "Data imported successfully!",
+    import_error: "Import failed — file format not recognized.",
     sign_in: "Sign in",
     sign_out: "Sign out",
     auth_email_label: "Enter your email to receive a magic link:",
@@ -136,6 +139,9 @@ const I18N = {
     hp_synergy: "配合",
     hp_no_synergy: "暂无配合记录",
     export_btn: "导出数据",
+    import_btn: "导入数据",
+    import_success: "数据导入成功！",
+    import_error: "导入失败 — 文件格式无法识别。",
     sign_in: "登录",
     sign_out: "退出登录",
     auth_email_label: "输入邮箱，我们会发送一条登录链接：",
@@ -1919,6 +1925,75 @@ function exportDefaultData() {
         '\n\nTip: requires loading the page over http:// (not file://). ' +
         'Run e.g. `python3 -m http.server 8000` in the project root.');
     });
+}
+
+// ===== IMPORT DATA =====
+// Accepts either:
+//   (a) JSON state file: { pool, junglers, starred, champData, extraTags, ... }
+//   (b) champions-data.js: parses the DEFAULT_CHAMP_DATA = { ... } block
+function importData(input) {
+  if (!input || !input.files || !input.files[0]) return;
+  const file = input.files[0];
+  const reader = new FileReader();
+
+  reader.onload = function (e) {
+    const text = e.target.result;
+    let imported = null;
+
+    // Try (a): direct JSON state
+    try {
+      const parsed = JSON.parse(text);
+      if (parsed && (parsed.pool || parsed.champData || parsed.extraTags)) {
+        imported = parsed;
+      }
+    } catch (_) {}
+
+    // Try (b): extract DEFAULT_CHAMP_DATA from JS file
+    if (!imported) {
+      const marker = 'DEFAULT_CHAMP_DATA';
+      const idx = text.indexOf(marker);
+      if (idx >= 0) {
+        const braceStart = text.indexOf('{', idx);
+        if (braceStart >= 0) {
+          let depth = 0, endIdx = -1;
+          for (let i = braceStart; i < text.length; i++) {
+            if (text[i] === '{') depth++;
+            else if (text[i] === '}') { depth--; if (depth === 0) { endIdx = i + 1; break; } }
+          }
+          if (endIdx > 0) {
+            try {
+              const obj = (new Function('return ' + text.slice(braceStart, endIdx)))();
+              if (obj && typeof obj === 'object') {
+                imported = { champData: obj };
+              }
+            } catch (_) {}
+          }
+        }
+      }
+    }
+
+    if (!imported) {
+      alert(t('import_error'));
+      input.value = '';
+      return;
+    }
+
+    // Apply to state
+    if (imported.pool)          state.pool      = new Set(imported.pool);
+    if (imported.junglers)      state.junglers  = new Set(imported.junglers);
+    if (imported.starred)       state.starred   = new Set(imported.starred);
+    if (imported.champData)     state.champData = imported.champData;
+    if (imported.extraTags)     state.extraTags = imported.extraTags;
+    if (imported.starredTags)   state.starredTags = imported.starredTags;
+    if (imported.unstarredTags) state.unstarredTags = imported.unstarredTags;
+
+    saveState();
+    rerenderCurrentView();
+    alert(t('import_success'));
+    input.value = '';
+  };
+
+  reader.readAsText(file);
 }
 
 // ===== INIT =====
