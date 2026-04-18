@@ -21,8 +21,8 @@
       <p class="title-desc" data-i18n="title_desc">点击英雄加入自己的英雄池，查看特性补阵容缺陷，克制关系BP避免对位压制/实现压制</p>
     </div>
     <div class="header-right">
-      <button id="auth-btn" class="auth-btn" onclick="WRSync && WRSync.handleAuthButtonClick()" type="button" data-i18n="sign_in">Sign in</button>
       <span id="sync-dot" class="sync-dot hidden" aria-hidden="true"></span>
+      <button id="auth-btn" class="auth-btn" onclick="WRSync && WRSync.handleAuthButtonClick()" type="button" data-i18n="sign_in">Sign in</button>
       <button id="export-btn" class="export-btn" onclick="exportDefaultData()" type="button" data-i18n="export_btn">导出数据</button>
       <button id="import-btn" class="export-btn" onclick="document.getElementById('import-file').click()" type="button" data-i18n="import_btn">导入数据</button>
       <input type="file" id="import-file" accept=".json,.js" style="display:none" onchange="importData(this)">

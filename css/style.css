@@ -1069,7 +1069,7 @@ input  { font-family: inherit; }
   gap: 16px;
   background: #000;
   border-top: 1px solid rgba(255, 255, 255, 0.12);
-  padding: 10px 24px;
+  padding: 10px 24px 15px;
   user-select: none;
 }
 .footer-copyright,
@@ -1945,22 +1945,20 @@ body.lang-en .champ-card.hp-active .champ-name .en { color: #f5f0a0; }
 .merge-stats b { color: #fff; font-weight: 600; }
 
 @media (max-width: 640px) {
+  .sync-dot {
+    order: 10;
+    margin: 0 6px 0 0;
+  }
   .auth-btn {
     font-size: 0.72rem;
     padding: 6px 10px;
     letter-spacing: 0.8px;
-    max-width: none;
-    width: 50%;
+    max-width: calc(50% - 16px);
     text-align: center;
     order: 10;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    margin-left: auto;
-  }
-  .sync-dot {
-    order: 9;
-    margin: 0 -4px 0 auto;
   }
   .auth-modal-panel {
     padding: 22px 18px 18px;
