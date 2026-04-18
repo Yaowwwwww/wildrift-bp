@@ -968,14 +968,42 @@ function buildCard(champ, mode) {
 
   // Hover trigger zone — only the bottom portion of the image triggers hover.
   // Top strip is reserved for star (left) and badge (right) interactions.
+  // Double-tap on this zone toggles pool membership and suppresses hover.
   const hoverZone = document.createElement('div');
   hoverZone.className = 'card-hover-zone';
   imgWrap.appendChild(hoverZone);
   attachHoverPanel(hoverZone, champ);
 
-  // Click behavior depends on pool state:
-  //   NOT in pool → click adds to pool directly
-  //   IN pool     → click only toggles hover (use ✓/★ corners to change state)
+  // Double-click / double-tap detection on the hover zone
+  let lastTapTime = 0;
+  const DOUBLE_TAP_MS = 350;
+
+  hoverZone.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const now = Date.now();
+    if (now - lastTapTime < DOUBLE_TAP_MS) {
+      // Double-click detected — toggle pool, cancel any pending hover
+      lastTapTime = 0;
+      clearTimeout(hpShowTimeout);
+      hideHoverPanel();
+      if (mode === 'add') {
+        togglePool(champ.id);
+        renderAddGrid();
+      }
+      return;
+    }
+    lastTapTime = now;
+
+    // Single click — show/dismiss hover (delayed to detect possible double)
+    setTimeout(() => {
+      if (Date.now() - lastTapTime < DOUBLE_TAP_MS) return; // second tap incoming
+      if (hpSourceCard === card && !tooltipEl.classList.contains('hidden')) {
+        hideHoverPanel();
+      }
+    }, DOUBLE_TAP_MS);
+  });
+
+  // Card-level click for non-hover-zone areas (name text, etc.)
   if (mode === 'add') {
     card.addEventListener('click', () => {
       if (hpSourceCard === card && !tooltipEl.classList.contains('hidden')) {
