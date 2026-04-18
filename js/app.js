@@ -1229,15 +1229,12 @@ function positionHoverPanel(cardEl) {
   const anchor = card.querySelector('.champ-img-wrap') || cardEl;
   const ref = anchor.getBoundingClientRect();
   const pw  = tooltipEl.offsetWidth  || 230;
-  const bottomMargin = 0;
 
-  // Tooltip sits between the card's bottom edge and the viewport bottom.
-  // max-height is clamped so the panel never overflows below the viewport.
-  const availableHeight = window.innerHeight - ref.bottom - bottomMargin;
-  const top = ref.bottom;
+  // Tooltip fills from the card's bottom edge all the way to the viewport bottom.
+  const availableHeight = window.innerHeight - ref.bottom;
 
-  tooltipEl.style.top = top + 'px';
-  tooltipEl.style.maxHeight = Math.max(120, availableHeight) + 'px';
+  tooltipEl.style.top = ref.bottom + 'px';
+  tooltipEl.style.height = Math.max(120, availableHeight) + 'px';
   tooltipEl.style.overflowY = 'auto';
 
   // Left-align by default; if it overflows right, right-align to card's right edge
@@ -1246,19 +1243,28 @@ function positionHoverPanel(cardEl) {
   if (left < 6) left = 6;
   tooltipEl.style.left = left + 'px';
 
-  // Dynamically adjust spacing between sections to fill available height.
-  // Sections are .hp-divider elements — increase their margin when there's room.
-  const contentHeight = tooltipEl.scrollHeight;
-  const displayHeight = tooltipEl.clientHeight;
-  const dividers = tooltipEl.querySelectorAll('.hp-divider');
-  if (dividers.length > 0 && displayHeight > contentHeight * 0.9) {
-    // Extra space to distribute evenly between dividers
-    const extra = Math.max(0, displayHeight - contentHeight);
-    const perDivider = Math.floor(extra / dividers.length);
-    dividers.forEach(d => d.style.marginTop = d.style.marginBottom = (4 + perDivider / 2) + 'px');
-  } else {
-    dividers.forEach(d => d.style.marginTop = d.style.marginBottom = '');
-  }
+  // Dynamically distribute extra vertical space across section dividers
+  // so the content spreads evenly instead of bunching at the top.
+  requestAnimationFrame(() => {
+    const dividers = tooltipEl.querySelectorAll('.hp-divider');
+    if (!dividers.length) return;
+
+    // Reset first so scrollHeight reflects natural content size
+    dividers.forEach(d => { d.style.marginTop = ''; d.style.marginBottom = ''; });
+
+    const contentHeight = tooltipEl.scrollHeight;
+    const boxHeight     = tooltipEl.clientHeight;
+    const extra = boxHeight - contentHeight;
+
+    if (extra > 10) {
+      // Distribute extra space evenly between dividers
+      const perDivider = Math.floor(extra / dividers.length / 2);
+      dividers.forEach(d => {
+        d.style.marginTop    = perDivider + 'px';
+        d.style.marginBottom = perDivider + 'px';
+      });
+    }
+  });
 }
 
 const isTouchDevice = window.matchMedia && window.matchMedia('(hover: none)').matches;
