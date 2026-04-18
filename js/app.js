@@ -1222,7 +1222,7 @@ function positionHoverPanel(cardEl) {
   const anchor = card.querySelector('.champ-img-wrap') || cardEl;
   const ref = anchor.getBoundingClientRect();
   const pw  = tooltipEl.offsetWidth  || 230;
-  const bottomMargin = 8;
+  const bottomMargin = 0;
 
   // Tooltip sits between the card's bottom edge and the viewport bottom.
   // max-height is clamped so the panel never overflows below the viewport.
