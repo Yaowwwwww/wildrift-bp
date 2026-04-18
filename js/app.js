@@ -1070,11 +1070,18 @@ function allKeywordTags() {
 
 function attachHoverPanel(el, champ) {
   el.addEventListener('mouseenter', () => {
-    if (hpLocked) return;        // fully suppressed during navigation
-    if (hpScrolling) return;     // don't trigger hover while scrolling (esp. mobile)
+    if (hpLocked) return;
+    if (hpScrolling) return;
     clearTimeout(hpTimeout);
     clearTimeout(hpShowTimeout);
-    hpShowTimeout = setTimeout(() => showHoverPanel(champ, el), 300);
+    // If another card's panel is already visible, use a longer dwell delay
+    // to prevent rapid jumping when the mouse sweeps across multiple cards.
+    const alreadyShowing = hpSourceCard && hpSourceCard !== el && !tooltipEl.classList.contains('hidden');
+    const delay = alreadyShowing ? 600 : 300;
+    hpShowTimeout = setTimeout(() => {
+      if (alreadyShowing) hideHoverPanel();
+      showHoverPanel(champ, el);
+    }, delay);
   });
   el.addEventListener('mouseleave', (e) => {
     clearTimeout(hpShowTimeout);
