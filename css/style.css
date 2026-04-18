@@ -1953,16 +1953,16 @@ body.lang-en .champ-card.hp-active .champ-name .en { color: #f5f0a0; }
   .auth-row {
     width: 100%;
     display: flex;
-    justify-content: flex-end;
+    justify-content: center;
     align-items: center;
-    gap: 12px;
+    gap: 8px;
     order: 10;
   }
   .auth-row .auth-btn {
     font-size: 0.72rem;
     padding: 6px 10px;
     letter-spacing: 0.8px;
-    width: 50%;
+    flex: 1;
     max-width: none;
     text-align: center;
     white-space: nowrap;
@@ -1971,6 +1971,13 @@ body.lang-en .champ-card.hp-active .champ-name .en { color: #f5f0a0; }
   }
   .auth-row .sync-dot {
     margin: 0;
+  }
+  .header-right .export-btn,
+  .header-right #import-btn {
+    flex: 1;
+  }
+  .header-right .lang-toggle {
+    flex: 0 0 auto;
   }
   .auth-modal-panel {
     padding: 22px 18px 18px;

@@ -1012,6 +1012,7 @@ function buildCard(champ, mode) {
     setTimeout(() => {
       if (Date.now() - lastTapTime < DOUBLE_TAP_MS) return; // second tap incoming
       if (currentCardPanelId === champ.id && !tooltipEl.classList.contains('hidden')) {
+        if (Date.now() - hpShownAt < 500) return; // don't dismiss within 0.5s of showing
         hideHoverPanel();
       } else {
         clearTimeout(hpShowTimeout);
@@ -1140,6 +1141,7 @@ let hpBeCounterSearchOpen = false;
 let hpSynergySearchOpen  = false;
 let hpTimeout            = null;
 let hpShowTimeout        = null;
+let hpShownAt            = 0;       // timestamp when hover panel was last shown
 let hpScrolling          = false;   // true while user is scrolling; blocks new hover triggers
 let hpScrollSettleTimer  = null;
 let hpLocked             = false;   // suppresses all hover during navigation
@@ -1191,6 +1193,7 @@ function showHoverPanel(champ, cardEl) {
   hpSynergySearchOpen   = false;
   renderHoverPanel(champ.id);
   tooltipEl.classList.remove('hidden');
+  hpShownAt = Date.now();
   positionHoverPanel(cardEl);
 
   if (isTouchDevice) {
