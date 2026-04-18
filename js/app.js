@@ -1236,44 +1236,15 @@ function positionHoverPanel(cardEl) {
   const availableHeight = vpHeight - ref.bottom - 12;
 
   tooltipEl.style.top = ref.bottom + 'px';
-  tooltipEl.style.height = '';
-  tooltipEl.style.maxHeight = '';
+  tooltipEl.style.height = Math.max(120, availableHeight) + 'px';
   tooltipEl.style.overflowY = 'auto';
+  tooltipEl.style.paddingBottom = '20px';
 
   // Left-align by default; if it overflows right, right-align to card's right edge
   let left = ref.left;
   if (left + pw > window.innerWidth - 6) left = ref.right - pw;
   if (left < 6) left = 6;
   tooltipEl.style.left = left + 'px';
-
-  const safeHeight = Math.max(120, availableHeight);
-
-  requestAnimationFrame(() => {
-    const dividers = tooltipEl.querySelectorAll('.hp-divider');
-    const naturalHeight = tooltipEl.scrollHeight;
-
-    if (naturalHeight <= safeHeight) {
-      // Content fits — stretch to fill available space, distribute extra as padding
-      tooltipEl.style.height = safeHeight + 'px';
-      tooltipEl.style.overflowY = 'hidden';
-
-      if (dividers.length) {
-        const extra = safeHeight - naturalHeight;
-        if (extra > 10) {
-          const perDivider = Math.floor(extra / dividers.length / 2);
-          dividers.forEach(d => {
-            d.style.marginTop    = perDivider + 'px';
-            d.style.marginBottom = perDivider + 'px';
-          });
-        }
-      }
-    } else {
-      // Content overflows — cap at available height, allow scrolling
-      tooltipEl.style.maxHeight = safeHeight + 'px';
-      tooltipEl.style.overflowY = 'auto';
-      dividers.forEach(d => { d.style.marginTop = ''; d.style.marginBottom = ''; });
-    }
-  });
 }
 
 const isTouchDevice = window.matchMedia && window.matchMedia('(hover: none)').matches;
