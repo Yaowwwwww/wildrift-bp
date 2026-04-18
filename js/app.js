@@ -982,10 +982,15 @@ function buildCard(champ, mode) {
     e.stopPropagation();
     const now = Date.now();
     if (now - lastTapTime < DOUBLE_TAP_MS) {
-      // Double-click detected — toggle pool, cancel any pending hover
+      // Double-click detected — toggle pool, cancel any pending hover,
+      // and lock hover for 800ms so the re-rendered grid doesn't
+      // immediately trigger hover on the champion at the same position.
       lastTapTime = 0;
       clearTimeout(hpShowTimeout);
       hideHoverPanel();
+      hpLocked = true;
+      clearTimeout(hpLockTimer);
+      hpLockTimer = setTimeout(() => { hpLocked = false; }, 800);
       if (mode === 'add') {
         togglePool(champ.id);
         renderAddGrid();
@@ -1209,15 +1214,22 @@ function markScrolling() {
   hpScrollSettleTimer = setTimeout(() => { hpScrolling = false; }, 300);
 }
 
-document.addEventListener('scroll', () => {
+document.addEventListener('scroll', (e) => {
+  if (hpProgrammaticScroll) return;
+  // Scrolling INSIDE the tooltip is fine — don't dismiss or mark scrolling
+  if (e.target === tooltipEl || (e.target && tooltipEl.contains(e.target))) {
+    return;
+  }
   markScrolling();
   if (!hpSourceCard || tooltipEl.classList.contains('hidden')) return;
   if (isTouchDevice) hideHoverPanel();
   else positionHoverPanel(hpSourceCard);
 }, { passive: true, capture: true });
 
-// Touch devices: touchmove dismisses the panel and suppresses new triggers
-document.addEventListener('touchmove', () => {
+// Touch devices: touchmove dismisses UNLESS the finger is inside the tooltip
+document.addEventListener('touchmove', (e) => {
+  if (hpProgrammaticScroll) return;
+  if (e.target && tooltipEl.contains(e.target)) return; // scrolling inside tooltip
   markScrolling();
   if (hpSourceCard && !tooltipEl.classList.contains('hidden')) hideHoverPanel();
 }, { passive: true });
