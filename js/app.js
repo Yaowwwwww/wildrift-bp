@@ -916,7 +916,7 @@ function buildCard(champ, mode) {
     // Top-right ✓ badge — always visible, click to remove from pool
     const badge = document.createElement('div');
     badge.className = 'card-badge';
-    badge.textContent = '✓';
+    badge.innerHTML = '<span class="card-badge-icon">✓</span>';
     badge.addEventListener('click', (e) => {
       e.stopPropagation();
       clearTimeout(hpShowTimeout);
@@ -937,7 +937,7 @@ function buildCard(champ, mode) {
     const star = document.createElement('button');
     star.className = 'card-star is-pool' + (isStarred ? ' is-starred' : '');
     star.type = 'button';
-    star.textContent = '★';
+    star.innerHTML = '<span class="card-star-icon">★</span>';
     star.title = isStarred ? t('unpin_title') : t('pin_title');
     star.addEventListener('click', (e) => {
       e.stopPropagation();
