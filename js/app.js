@@ -1236,8 +1236,8 @@ function positionHoverPanel(cardEl) {
   const availableHeight = vpHeight - ref.bottom - 12;
 
   tooltipEl.style.top = ref.bottom + 'px';
-  tooltipEl.style.maxHeight = Math.max(120, availableHeight) + 'px';
   tooltipEl.style.height = '';
+  tooltipEl.style.maxHeight = '';
   tooltipEl.style.overflowY = 'auto';
 
   // Left-align by default; if it overflows right, right-align to card's right edge
@@ -1246,26 +1246,32 @@ function positionHoverPanel(cardEl) {
   if (left < 6) left = 6;
   tooltipEl.style.left = left + 'px';
 
-  // Dynamically distribute extra vertical space across section dividers
-  // so the content spreads evenly instead of bunching at the top.
+  const safeHeight = Math.max(120, availableHeight);
+
   requestAnimationFrame(() => {
     const dividers = tooltipEl.querySelectorAll('.hp-divider');
-    if (!dividers.length) return;
+    const naturalHeight = tooltipEl.scrollHeight;
 
-    // Reset first so scrollHeight reflects natural content size
-    dividers.forEach(d => { d.style.marginTop = ''; d.style.marginBottom = ''; });
+    if (naturalHeight <= safeHeight) {
+      // Content fits — stretch to fill available space, distribute extra as padding
+      tooltipEl.style.height = safeHeight + 'px';
+      tooltipEl.style.overflowY = 'hidden';
 
-    const contentHeight = tooltipEl.scrollHeight;
-    const boxHeight     = tooltipEl.clientHeight;
-    const extra = boxHeight - contentHeight;
-
-    if (extra > 10) {
-      // Distribute extra space evenly between dividers
-      const perDivider = Math.floor(extra / dividers.length / 2);
-      dividers.forEach(d => {
-        d.style.marginTop    = perDivider + 'px';
-        d.style.marginBottom = perDivider + 'px';
-      });
+      if (dividers.length) {
+        const extra = safeHeight - naturalHeight;
+        if (extra > 10) {
+          const perDivider = Math.floor(extra / dividers.length / 2);
+          dividers.forEach(d => {
+            d.style.marginTop    = perDivider + 'px';
+            d.style.marginBottom = perDivider + 'px';
+          });
+        }
+      }
+    } else {
+      // Content overflows — cap at available height, allow scrolling
+      tooltipEl.style.maxHeight = safeHeight + 'px';
+      tooltipEl.style.overflowY = 'auto';
+      dividers.forEach(d => { d.style.marginTop = ''; d.style.marginBottom = ''; });
     }
   });
 }
