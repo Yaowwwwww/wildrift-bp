@@ -77,6 +77,11 @@ input  { font-family: inherit; }
   gap: 12px;
   flex-shrink: 0;
 }
+.auth-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
 
 .btn-back {
   background: transparent;
@@ -1945,20 +1950,26 @@ body.lang-en .champ-card.hp-active .champ-name .en { color: #f5f0a0; }
 .merge-stats b { color: #fff; font-weight: 600; }
 
 @media (max-width: 640px) {
-  .sync-dot {
+  .auth-row {
+    width: 100%;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 6px;
     order: 10;
-    margin: 0 6px 0 0;
   }
-  .auth-btn {
+  .auth-row .auth-btn {
     font-size: 0.72rem;
     padding: 6px 10px;
     letter-spacing: 0.8px;
-    max-width: calc(50% - 16px);
+    max-width: 50%;
     text-align: center;
-    order: 10;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+  }
+  .auth-row .sync-dot {
+    margin: 0;
   }
   .auth-modal-panel {
     padding: 22px 18px 18px;
