@@ -1950,15 +1950,17 @@ body.lang-en .champ-card.hp-active .champ-name .en { color: #f5f0a0; }
     padding: 6px 10px;
     letter-spacing: 0.8px;
     max-width: none;
-    width: 100%;
+    width: 50%;
     text-align: center;
     order: 10;
     white-space: nowrap;
-    overflow: visible;
-    text-overflow: unset;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-left: auto;
   }
   .sync-dot {
-    margin: 0 2px 0 -4px;
+    order: 9;
+    margin: 0 -4px 0 auto;
   }
   .auth-modal-panel {
     padding: 22px 18px 18px;
