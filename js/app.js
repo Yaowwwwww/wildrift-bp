@@ -1191,8 +1191,7 @@ function showHoverPanel(champ, cardEl) {
   if (addScreen) {
     const cardRect = actualCard.getBoundingClientRect();
     const screenRect = addScreen.getBoundingClientRect();
-    const targetY = window.innerHeight * 0.15;
-    const scrollDelta = cardRect.top - screenRect.top - targetY + addScreen.scrollTop;
+    const scrollDelta = cardRect.top - screenRect.top + addScreen.scrollTop;
     addScreen.scrollTo({ top: Math.max(0, scrollDelta), behavior: 'smooth' });
   }
   setTimeout(() => {
