@@ -919,6 +919,8 @@ function buildCard(champ, mode) {
     badge.textContent = '✓';
     badge.addEventListener('click', (e) => {
       e.stopPropagation();
+      clearTimeout(hpShowTimeout);
+      hideHoverPanel();
       togglePool(champ.id);
       renderAddGrid();
     });
@@ -939,6 +941,8 @@ function buildCard(champ, mode) {
     star.title = isStarred ? t('unpin_title') : t('pin_title');
     star.addEventListener('click', (e) => {
       e.stopPropagation();
+      clearTimeout(hpShowTimeout);
+      hideHoverPanel();
       toggleStar(champ.id);
       if (mode === 'add') renderAddGrid();
       else renderPoolGrid();
@@ -946,8 +950,12 @@ function buildCard(champ, mode) {
     imgWrap.appendChild(star);
   }
 
-  // Interactive hover panel
-  attachHoverPanel(card, champ);
+  // Hover trigger zone — only the bottom portion of the image triggers hover.
+  // Top strip is reserved for star (left) and badge (right) interactions.
+  const hoverZone = document.createElement('div');
+  hoverZone.className = 'card-hover-zone';
+  imgWrap.appendChild(hoverZone);
+  attachHoverPanel(hoverZone, champ);
 
   // Click behavior depends on pool state:
   //   NOT in pool → click adds to pool directly
