@@ -1942,7 +1942,13 @@ body.lang-en .champ-card.hp-active .champ-name .en { color: #f5f0a0; }
     font-size: 0.72rem;
     padding: 6px 10px;
     letter-spacing: 0.8px;
-    max-width: 140px;
+    max-width: none;
+    width: 100%;
+    text-align: center;
+    order: 10;
+    white-space: nowrap;
+    overflow: visible;
+    text-overflow: unset;
   }
   .sync-dot {
     margin: 0 2px 0 -4px;
