@@ -346,14 +346,13 @@ input  { font-family: inherit; }
   width: 16px;
   height: 16px;
   box-sizing: border-box;
-  border: 1.5px dashed rgba(255, 255, 255, 0.5);
-  transition: border-color 0.15s ease, border-style 0.15s ease, background 0.15s ease, transform 0.15s ease;
+  border: 1.5px solid rgba(255, 255, 255, 0.5);
+  transition: border-color 0.15s ease, background 0.15s ease, transform 0.15s ease;
 }
 .champ-card:hover .card-badge-hollow {
   opacity: 1;
 }
 .champ-card:hover .card-badge-hollow::after {
-  border-style: solid;
   border-color: rgba(255, 255, 255, 0.8);
 }
 .card-badge-hollow:hover::after {
