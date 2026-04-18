@@ -25,9 +25,9 @@
         <span id="sync-dot" class="sync-dot hidden" aria-hidden="true"></span>
         <button id="auth-btn" class="auth-btn" onclick="WRSync && WRSync.handleAuthButtonClick()" type="button" data-i18n="sign_in">Sign in</button>
       </div>
-      <button id="export-btn" class="export-btn" onclick="exportDefaultData()" type="button" data-i18n="export_btn">导出数据</button>
       <button id="import-btn" class="export-btn" onclick="document.getElementById('import-file').click()" type="button" data-i18n="import_btn">导入数据</button>
       <input type="file" id="import-file" accept=".json,.js" style="display:none" onchange="importData(this)">
+      <button id="export-btn" class="export-btn" onclick="exportDefaultData()" type="button" data-i18n="export_btn">导出数据</button>
       <button id="lang-toggle" class="lang-toggle" onclick="toggleLanguage()" type="button" aria-label="Switch language">
         <span class="lang-label lang-label-en">EN</span>
         <span class="lang-track"><span class="lang-knob"><span class="lang-flag lang-flag-en">🇺🇸</span><span class="lang-flag lang-flag-cn">🇨🇳</span></span></span>

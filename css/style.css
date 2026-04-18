@@ -160,18 +160,18 @@ input  { font-family: inherit; }
   font-size: calc(1rem + 5px);
   font-weight: 700;
   letter-spacing: 0.8px;
-  color: #e8d88a;
-  text-shadow: 0 0 8px rgba(240, 230, 140, 0.25),
+  color: #fff;
+  text-shadow: 0 0 4px rgba(255, 255, 255, 0.2),
                0 1px 2px rgba(0, 0, 0, 0.8);
   white-space: nowrap;
   cursor: default;
   transition: color 0.3s ease, text-shadow 0.3s ease, transform 0.3s ease;
 }
 .tagline-text:hover {
-  color: #fff4b8;
-  text-shadow: 0 0 6px rgba(255, 244, 184, 0.9),
-               0 0 14px rgba(240, 230, 140, 0.7),
-               0 0 24px rgba(240, 230, 140, 0.45),
+  color: #f0e68c;
+  text-shadow: 0 0 8px rgba(240, 230, 140, 0.8),
+               0 0 18px rgba(240, 230, 140, 0.5),
+               0 0 30px rgba(240, 230, 140, 0.3),
                0 1px 2px rgba(0, 0, 0, 0.8);
   transform: scale(1.03);
 }
@@ -1679,13 +1679,15 @@ body.lang-en .champ-card.hp-active .champ-name .en { color: #f5f0a0; }
     padding: 0 12px;
   }
   .tagline-wrap {
-    margin: 6px 12px 0;
+    margin: 0 12px;
+    padding: 4px 0;
   }
   .tagline-text {
-    font-size: 0.72rem;
+    font-size: 0.92rem;
     letter-spacing: 0.4px;
     white-space: normal;
     text-align: center;
+    color: #fff;
   }
   .tagline-line { display: none; }
   .champ-grid {
@@ -1953,6 +1955,7 @@ body.lang-en .champ-card.hp-active .champ-name .en { color: #f5f0a0; }
   .auth-row {
     width: 100%;
     display: flex;
+    flex-direction: row-reverse;
     justify-content: center;
     align-items: center;
     gap: 8px;
@@ -1968,10 +1971,16 @@ body.lang-en .champ-card.hp-active .champ-name .en { color: #f5f0a0; }
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    color: #fff;
+    border-color: #555;
+    transition: border-color 0.3s ease, color 0.15s ease;
   }
   .auth-row .sync-dot {
     margin: 0;
   }
+  .auth-row .sync-dot.syncing ~ .auth-btn { border-color: #f0e68c; }
+  .auth-row .sync-dot.saved ~ .auth-btn { border-color: #6fcf7a; }
+  .auth-row .sync-dot.sync-error ~ .auth-btn { border-color: #e06c6c; }
   .header-right .export-btn,
   .header-right #import-btn {
     flex: 1;
