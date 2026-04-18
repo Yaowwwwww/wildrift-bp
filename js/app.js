@@ -292,7 +292,9 @@ let state = {
   champData:     {},         // { [id]: { tags: string[], counters: string[] } }
   extraTags:     [],         // user-created global keywords
   starredTags:   [],         // user-added priority keyword chips
-  unstarredTags: []          // user-removed priority keyword chips (blacklist for DEFAULT_PRIORITY_TAGS)
+  unstarredTags: [],         // user-removed priority keyword chips (blacklist for DEFAULT_PRIORITY_TAGS)
+  poolTimestamps: {},        // { champId: epoch_ms } — when added to pool
+  starTimestamps: {}         // { champId: epoch_ms } — when starred
 };
 
 let currentAddLane    = 'all';
@@ -399,7 +401,9 @@ function createEmptyState() {
     champData: {},
     extraTags: [],
     starredTags: [],
-    unstarredTags: []
+    unstarredTags: [],
+    poolTimestamps: {},
+    starTimestamps: {}
   };
 }
 
@@ -484,9 +488,11 @@ function loadState() {
       state.junglers   = new Set(parsed.junglers  || []);
       state.starred    = new Set(parsed.starred   || []);
       state.champData  = normalizeStoredChampData(parsed.champData || {}, getDefaultChampData());
-      state.extraTags    = parsed.extraTags    || [];
-      state.starredTags  = parsed.starredTags  || [];
-      state.unstarredTags = parsed.unstarredTags || [];
+      state.extraTags     = parsed.extraTags     || [];
+      state.starredTags   = parsed.starredTags   || [];
+      state.unstarredTags = parsed.unstarredTags  || [];
+      state.poolTimestamps = parsed.poolTimestamps || {};
+      state.starTimestamps = parsed.starTimestamps || {};
     }
   } catch (e) { /* ignore */ }
 
@@ -501,13 +507,15 @@ function loadState() {
 
 function saveState() {
   localStorage.setItem(STATE_STORAGE_KEY, JSON.stringify({
-    pool:          [...state.pool],
-    junglers:      [...state.junglers],
-    starred:       [...state.starred],
-    champData:     state.champData,
-    extraTags:     state.extraTags || [],
-    starredTags:   state.starredTags || [],
-    unstarredTags: state.unstarredTags || []
+    pool:           [...state.pool],
+    junglers:       [...state.junglers],
+    starred:        [...state.starred],
+    champData:      state.champData,
+    extraTags:      state.extraTags || [],
+    starredTags:    state.starredTags || [],
+    unstarredTags:  state.unstarredTags || [],
+    poolTimestamps: state.poolTimestamps || {},
+    starTimestamps: state.starTimestamps || {}
   }));
   if (window.WRSync && window.WRSync.schedulePush) window.WRSync.schedulePush();
 }
@@ -517,13 +525,15 @@ function saveState() {
 // personal state (Sets flattened to arrays) suitable for upsert.
 window.getSyncableState = function () {
   return {
-    pool:          [...state.pool],
-    junglers:      [...state.junglers],
-    starred:       [...state.starred],
-    champData:     state.champData || {},
-    extraTags:     state.extraTags || [],
-    starredTags:   state.starredTags || [],
-    unstarredTags: state.unstarredTags || []
+    pool:           [...state.pool],
+    junglers:       [...state.junglers],
+    starred:        [...state.starred],
+    champData:      state.champData || {},
+    extraTags:      state.extraTags || [],
+    starredTags:    state.starredTags || [],
+    unstarredTags:  state.unstarredTags || [],
+    poolTimestamps: state.poolTimestamps || {},
+    starTimestamps: state.starTimestamps || {}
   };
 };
 
@@ -532,13 +542,15 @@ window.getSyncableState = function () {
 // saveState() it triggers doesn't echo back to the server.
 window.setStateFromSync = function (s) {
   if (!s) return;
-  state.pool          = new Set(s.pool      || []);
-  state.junglers      = new Set(s.junglers  || []);
-  state.starred       = new Set(s.starred   || []);
-  state.champData     = s.champData || {};
-  state.extraTags     = s.extraTags || [];
-  state.starredTags   = s.starredTags || [];
-  state.unstarredTags = s.unstarredTags || [];
+  state.pool           = new Set(s.pool      || []);
+  state.junglers       = new Set(s.junglers  || []);
+  state.starred        = new Set(s.starred   || []);
+  state.champData      = s.champData || {};
+  state.extraTags      = s.extraTags || [];
+  state.starredTags    = s.starredTags || [];
+  state.unstarredTags  = s.unstarredTags || [];
+  state.poolTimestamps = s.poolTimestamps || {};
+  state.starTimestamps = s.starTimestamps || {};
   saveState();
   rerenderCurrentView();
 };
@@ -823,9 +835,13 @@ function renderAddGrid() {
   }
 
   // Order: starred → selected junglers → selected non-junglers → unselected
-  let selStarred   = champs.filter(c =>  state.pool.has(c.id) &&  state.starred.has(c.id));
-  let selJungle    = champs.filter(c =>  state.pool.has(c.id) && !state.starred.has(c.id) &&  state.junglers.has(c.id));
-  let selNonJungle = champs.filter(c =>  state.pool.has(c.id) && !state.starred.has(c.id) && !state.junglers.has(c.id));
+  // Sort helper: most recently acted-on first (descending timestamp)
+  const byStarTime = (a, b) => ((state.starTimestamps[b.id] || 0) - (state.starTimestamps[a.id] || 0));
+  const byPoolTime = (a, b) => ((state.poolTimestamps[b.id] || 0) - (state.poolTimestamps[a.id] || 0));
+
+  let selStarred   = champs.filter(c =>  state.pool.has(c.id) &&  state.starred.has(c.id)).sort(byStarTime);
+  let selJungle    = champs.filter(c =>  state.pool.has(c.id) && !state.starred.has(c.id) &&  state.junglers.has(c.id)).sort(byPoolTime);
+  let selNonJungle = champs.filter(c =>  state.pool.has(c.id) && !state.starred.has(c.id) && !state.junglers.has(c.id)).sort(byPoolTime);
   let unselected   = champs.filter(c => !state.pool.has(c.id));
 
   // "Starred only" wins over "Pool only" (starred is a subset of pool).
@@ -1039,10 +1055,15 @@ function redoSelection() {
 
 // ===== TOGGLE STAR (pin to front) =====
 function toggleStar(id) {
-  if (!state.pool.has(id)) return; // only pool members can be starred
+  if (!state.pool.has(id)) return;
   pushUndo();
-  if (state.starred.has(id)) state.starred.delete(id);
-  else state.starred.add(id);
+  if (state.starred.has(id)) {
+    state.starred.delete(id);
+    delete state.starTimestamps[id];
+  } else {
+    state.starred.add(id);
+    state.starTimestamps[id] = Date.now();
+  }
   saveState();
 }
 
@@ -1053,9 +1074,11 @@ function togglePool(id) {
     state.pool.delete(id);
     state.junglers.delete(id);
     state.starred.delete(id);
+    delete state.poolTimestamps[id];
+    delete state.starTimestamps[id];
   } else {
     state.pool.add(id);
-    // Auto-mark as jungler if in the default jungler list
+    state.poolTimestamps[id] = Date.now();
     if (typeof DEFAULT_JUNGLERS !== 'undefined' && DEFAULT_JUNGLERS.includes(id)) {
       state.junglers.add(id);
     }
