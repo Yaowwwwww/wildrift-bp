@@ -944,6 +944,13 @@ function buildCard(champ, mode) {
   } else if (mode === 'add' && !inPool) {
     const hollow = document.createElement('div');
     hollow.className = 'card-badge-hollow';
+    hollow.addEventListener('click', (e) => {
+      e.stopPropagation();
+      clearTimeout(hpShowTimeout);
+      hideHoverPanel();
+      togglePool(champ.id);
+      renderAddGrid();
+    });
     imgWrap.appendChild(hollow);
   }
 

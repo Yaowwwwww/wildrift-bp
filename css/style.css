@@ -332,9 +332,10 @@ input  { font-family: inherit; }
   box-sizing: border-box;
   background: transparent;
   border: none;
-  opacity: 0.35;
+  opacity: 0.5;
   transition: opacity 0.15s ease;
-  pointer-events: none;
+  pointer-events: auto;
+  cursor: pointer;
   z-index: 3;
   display: flex;
   align-items: flex-start;
@@ -346,14 +347,19 @@ input  { font-family: inherit; }
   height: 16px;
   box-sizing: border-box;
   border: 1.5px dashed rgba(255, 255, 255, 0.5);
-  box-shadow: 0 0 3px rgba(0, 0, 0, 0.5);
+  transition: border-color 0.15s ease, border-style 0.15s ease, background 0.15s ease, transform 0.15s ease;
 }
 .champ-card:hover .card-badge-hollow {
-  opacity: 0.9;
+  opacity: 1;
 }
 .champ-card:hover .card-badge-hollow::after {
   border-style: solid;
   border-color: rgba(255, 255, 255, 0.8);
+}
+.card-badge-hollow:hover::after {
+  border-color: #fff;
+  background: rgba(255, 255, 255, 0.9);
+  transform: scale(1.15);
 }
 
 /* Star (pin to front) — 28×24 transparent hit area, 16×16 visual icon inside */
