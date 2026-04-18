@@ -1169,11 +1169,15 @@ function attachHoverPanel(el, champ) {
 }
 
 function showHoverPanel(champ, cardEl) {
-  // Remove highlight from previous source card
-  if (hpSourceCard) hpSourceCard.classList.remove('hp-active');
+  // Remove highlight from previous source card's parent .champ-card
+  if (hpSourceCard) {
+    const prevCard = hpSourceCard.closest('.champ-card') || hpSourceCard;
+    prevCard.classList.remove('hp-active');
+  }
   currentCardPanelId    = champ.id;
   hpSourceCard          = cardEl;
-  cardEl.classList.add('hp-active');
+  const activeCard = cardEl.closest('.champ-card') || cardEl;
+  activeCard.classList.add('hp-active');
   hpTagPickerOpen       = false;
   hpCounterSearchOpen   = false;
   hpBeCounterSearchOpen = false;
@@ -1191,13 +1195,18 @@ function showHoverPanel(champ, cardEl) {
   if (addScreen) {
     const cardRect = actualCard.getBoundingClientRect();
     const screenRect = addScreen.getBoundingClientRect();
-    const scrollDelta = cardRect.top - screenRect.top + addScreen.scrollTop;
+    const scrollDelta = cardRect.top - screenRect.top + addScreen.scrollTop - 5;
     addScreen.scrollTo({ top: Math.max(0, scrollDelta), behavior: 'smooth' });
   }
-  setTimeout(() => {
+  // Lock hover during the scroll animation so cards sliding under the
+  // touch/mouse position don't trigger competing hover panels.
+  hpLocked = true;
+  clearTimeout(hpLockTimer);
+  hpLockTimer = setTimeout(() => {
     positionHoverPanel(cardEl);
     hpProgrammaticScroll = false;
-  }, 500);
+    hpLocked = false;
+  }, 600);
 
   tooltipEl.onmouseenter = () => clearTimeout(hpTimeout);
   tooltipEl.onmouseleave = (e) => {
@@ -1258,7 +1267,10 @@ document.addEventListener('wheel', markScrolling, { passive: true });
 
 function hideHoverPanel() {
   tooltipEl.classList.add('hidden');
-  if (hpSourceCard) hpSourceCard.classList.remove('hp-active');
+  if (hpSourceCard) {
+    const prevCard = hpSourceCard.closest('.champ-card') || hpSourceCard;
+    prevCard.classList.remove('hp-active');
+  }
   currentCardPanelId    = null;
   hpSourceCard          = null;
   hpTagPickerOpen       = false;
