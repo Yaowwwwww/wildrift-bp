@@ -169,7 +169,7 @@ const I18N = {
     hp_hint_comp_label: "阵容关键词推荐：",
     hp_hint_comp: '1. <span class="hp-kw">肉</span>（视野）<br>2. <span class="hp-kw">前期 / 节奏</span><br>3. <span class="hp-kw">后期 / 大C射手</span><br>4. <span class="hp-kw">收割 / 刺客</span><br>5. <span class="hp-kw">控制</span>（越多越好）',
     hp_hint_chain_label: "通用克制链（→表示克制）：",
-    hp_hint_chain: '<ul class="hp-chain-list"><li><span class="hp-kw">刺客 / 控制 / 爆发</span> → <span class="hp-kw">后期大C射手</span></li><li><span class="hp-kw">后期大C射手</span> → <span class="hp-kw">肉</span></li><li><span class="hp-kw">肉</span> → <span class="hp-kw">刺客 / 爆发</span></li></ul>',
+    hp_hint_chain: '<ul class="hp-chain-list"><li><span class="hp-kw">刺客 / 控制</span> → <span class="hp-kw">后期大C射手</span></li><li><span class="hp-kw">后期大C射手</span> → <span class="hp-kw">肉</span></li><li><span class="hp-kw">肉</span> → <span class="hp-kw">刺客 / 爆发</span></li></ul>',
     no_match: "无匹配英雄",
     delete: "删除",
     remove: "移除",
