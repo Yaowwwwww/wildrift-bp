@@ -913,9 +913,15 @@ function buildCard(champ, mode) {
   card.appendChild(name);
 
   if (mode === 'add' && inPool) {
+    // Top-right ✓ badge — always visible, click to remove from pool
     const badge = document.createElement('div');
     badge.className = 'card-badge';
     badge.textContent = '✓';
+    badge.addEventListener('click', (e) => {
+      e.stopPropagation();
+      togglePool(champ.id);
+      renderAddGrid();
+    });
     imgWrap.appendChild(badge);
   } else if (mode === 'add' && !inPool) {
     const hollow = document.createElement('div');
@@ -923,11 +929,11 @@ function buildCard(champ, mode) {
     imgWrap.appendChild(hollow);
   }
 
-  // Star button (pin to front) — only for champions in pool
+  // Star button (pin to front) — always visible for in-pool champions
   if (inPool) {
     const isStarred = state.starred.has(champ.id);
     const star = document.createElement('button');
-    star.className = 'card-star' + (isStarred ? ' is-starred' : '');
+    star.className = 'card-star is-pool' + (isStarred ? ' is-starred' : '');
     star.type = 'button';
     star.textContent = '★';
     star.title = isStarred ? t('unpin_title') : t('pin_title');
@@ -943,16 +949,19 @@ function buildCard(champ, mode) {
   // Interactive hover panel
   attachHoverPanel(card, champ);
 
-  // Click — but if the hover panel is currently showing for THIS card,
-  // the first click dismisses the hover panel instead of toggling pool/opening modal.
+  // Click behavior depends on pool state:
+  //   NOT in pool → click adds to pool directly
+  //   IN pool     → click only toggles hover (use ✓/★ corners to change state)
   if (mode === 'add') {
     card.addEventListener('click', () => {
       if (hpSourceCard === card && !tooltipEl.classList.contains('hidden')) {
         hideHoverPanel();
         return;
       }
-      togglePool(champ.id);
-      renderAddGrid();
+      if (!inPool) {
+        togglePool(champ.id);
+        renderAddGrid();
+      }
     });
   } else {
     card.addEventListener('click', () => {
