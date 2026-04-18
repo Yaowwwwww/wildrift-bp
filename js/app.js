@@ -1214,24 +1214,21 @@ function markScrolling() {
   hpScrollSettleTimer = setTimeout(() => { hpScrolling = false; }, 300);
 }
 
-document.addEventListener('scroll', (e) => {
+// On scroll (desktop + mobile): reposition the tooltip to follow its source card.
+// Tooltip no longer captures scroll — all scroll goes to the page.
+document.addEventListener('scroll', () => {
   if (hpProgrammaticScroll) return;
-  // Scrolling INSIDE the tooltip is fine — don't dismiss or mark scrolling
-  if (e.target === tooltipEl || (e.target && tooltipEl.contains(e.target))) {
-    return;
-  }
   markScrolling();
-  if (!hpSourceCard || tooltipEl.classList.contains('hidden')) return;
-  if (isTouchDevice) hideHoverPanel();
-  else positionHoverPanel(hpSourceCard);
+  if (hpSourceCard && !tooltipEl.classList.contains('hidden')) {
+    positionHoverPanel(hpSourceCard);
+  }
 }, { passive: true, capture: true });
 
-// Touch devices: touchmove dismisses UNLESS the finger is inside the tooltip
-document.addEventListener('touchmove', (e) => {
+// Touch devices: suppress new hover triggers while finger is moving,
+// but do NOT dismiss the current panel — let it follow via scroll handler.
+document.addEventListener('touchmove', () => {
   if (hpProgrammaticScroll) return;
-  if (e.target && tooltipEl.contains(e.target)) return; // scrolling inside tooltip
   markScrolling();
-  if (hpSourceCard && !tooltipEl.classList.contains('hidden')) hideHoverPanel();
 }, { passive: true });
 
 // Wheel scrolling on desktop also counts — suppress hover trigger during wheel
