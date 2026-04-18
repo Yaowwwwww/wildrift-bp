@@ -1236,7 +1236,8 @@ function positionHoverPanel(cardEl) {
   const availableHeight = vpHeight - ref.bottom - 12;
 
   tooltipEl.style.top = ref.bottom + 'px';
-  tooltipEl.style.height = Math.max(120, availableHeight) + 'px';
+  tooltipEl.style.maxHeight = Math.max(120, availableHeight) + 'px';
+  tooltipEl.style.height = '';
   tooltipEl.style.overflowY = 'auto';
 
   // Left-align by default; if it overflows right, right-align to card's right edge
