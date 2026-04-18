@@ -1184,6 +1184,7 @@ function showHoverPanel(champ, cardEl) {
   hpSynergySearchOpen   = false;
   renderHoverPanel(champ.id);
   tooltipEl.classList.remove('hidden');
+  positionHoverPanel(cardEl); // position immediately so tooltip doesn't flash at old location
 
   // Find the actual card element (cardEl may be the hover-zone child)
   const actualCard = cardEl.closest('.champ-card') || cardEl;
@@ -1215,11 +1216,10 @@ function showHoverPanel(champ, cardEl) {
 }
 
 function positionHoverPanel(cardEl) {
-  // Align to the img-wrap (the visible bordered square), not the inner <img>,
-  // so the hover panel aligns to the card's actual image border instead of
-  // shifting 1–2px inward when the highlight border thickens.
-  const anchor = cardEl.querySelector('.champ-img-wrap') || cardEl.querySelector('img');
-  const ref = anchor ? anchor.getBoundingClientRect() : cardEl.getBoundingClientRect();
+  // Find the img-wrap: could be a parent (if cardEl is hover-zone) or a child.
+  const card = cardEl.closest('.champ-card') || cardEl;
+  const anchor = card.querySelector('.champ-img-wrap') || cardEl;
+  const ref = anchor.getBoundingClientRect();
   const pw  = tooltipEl.offsetWidth  || 230;
 
   // Always show below the card
