@@ -1230,8 +1230,10 @@ function positionHoverPanel(cardEl) {
   const ref = anchor.getBoundingClientRect();
   const pw  = tooltipEl.offsetWidth  || 230;
 
-  // Tooltip fills from the card's bottom edge all the way to the viewport bottom.
-  const availableHeight = window.innerHeight - ref.bottom;
+  // Tooltip fills from the card's bottom edge to the visible viewport bottom.
+  // Use visualViewport for accurate mobile measurement (accounts for URL bar, keyboard, etc.)
+  const vpHeight = (window.visualViewport && window.visualViewport.height) || window.innerHeight;
+  const availableHeight = vpHeight - ref.bottom - 12;
 
   tooltipEl.style.top = ref.bottom + 'px';
   tooltipEl.style.height = Math.max(120, availableHeight) + 'px';
