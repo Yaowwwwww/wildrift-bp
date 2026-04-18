@@ -1201,17 +1201,7 @@ function showHoverPanel(champ, cardEl) {
   }
   // Lock hover during the scroll animation so cards sliding under the
   // touch/mouse position don't trigger competing hover panels.
-  // Also hide the cursor to prevent it from lingering over a wrong card
-  // after a large scroll jump. Cursor reappears on the next mousemove.
   hpLocked = true;
-  document.body.classList.add('cursor-hidden');
-  const restoreCursor = () => {
-    document.body.classList.remove('cursor-hidden');
-    document.removeEventListener('mousemove', restoreCursor);
-    document.removeEventListener('touchstart', restoreCursor);
-  };
-  document.addEventListener('mousemove', restoreCursor, { once: true });
-  document.addEventListener('touchstart', restoreCursor, { once: true });
 
   clearTimeout(hpLockTimer);
   hpLockTimer = setTimeout(() => {
@@ -1232,17 +1222,36 @@ function positionHoverPanel(cardEl) {
   const anchor = card.querySelector('.champ-img-wrap') || cardEl;
   const ref = anchor.getBoundingClientRect();
   const pw  = tooltipEl.offsetWidth  || 230;
+  const bottomMargin = 8;
 
-  // Always show below the card
+  // Tooltip sits between the card's bottom edge and the viewport bottom.
+  // max-height is clamped so the panel never overflows below the viewport.
+  const availableHeight = window.innerHeight - ref.bottom - bottomMargin;
   const top = ref.bottom;
+
+  tooltipEl.style.top = top + 'px';
+  tooltipEl.style.maxHeight = Math.max(120, availableHeight) + 'px';
+  tooltipEl.style.overflowY = 'auto';
 
   // Left-align by default; if it overflows right, right-align to card's right edge
   let left = ref.left;
   if (left + pw > window.innerWidth - 6) left = ref.right - pw;
   if (left < 6) left = 6;
-
   tooltipEl.style.left = left + 'px';
-  tooltipEl.style.top  = top  + 'px';
+
+  // Dynamically adjust spacing between sections to fill available height.
+  // Sections are .hp-divider elements — increase their margin when there's room.
+  const contentHeight = tooltipEl.scrollHeight;
+  const displayHeight = tooltipEl.clientHeight;
+  const dividers = tooltipEl.querySelectorAll('.hp-divider');
+  if (dividers.length > 0 && displayHeight > contentHeight * 0.9) {
+    // Extra space to distribute evenly between dividers
+    const extra = Math.max(0, displayHeight - contentHeight);
+    const perDivider = Math.floor(extra / dividers.length);
+    dividers.forEach(d => d.style.marginTop = d.style.marginBottom = (4 + perDivider / 2) + 'px');
+  } else {
+    dividers.forEach(d => d.style.marginTop = d.style.marginBottom = '');
+  }
 }
 
 const isTouchDevice = window.matchMedia && window.matchMedia('(hover: none)').matches;
