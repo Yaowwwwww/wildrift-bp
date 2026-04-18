@@ -17,6 +17,12 @@ html, body {
 button { cursor: pointer; font-family: inherit; }
 input  { font-family: inherit; }
 
+/* Hide cursor after scroll-jump; restored on next mousemove */
+body.cursor-hidden,
+body.cursor-hidden * {
+  cursor: none !important;
+}
+
 ::-webkit-scrollbar { width: 4px; height: 4px; }
 ::-webkit-scrollbar-track { background: #000; }
 ::-webkit-scrollbar-thumb { background: #444; }

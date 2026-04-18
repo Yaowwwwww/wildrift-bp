@@ -1201,7 +1201,18 @@ function showHoverPanel(champ, cardEl) {
   }
   // Lock hover during the scroll animation so cards sliding under the
   // touch/mouse position don't trigger competing hover panels.
+  // Also hide the cursor to prevent it from lingering over a wrong card
+  // after a large scroll jump. Cursor reappears on the next mousemove.
   hpLocked = true;
+  document.body.classList.add('cursor-hidden');
+  const restoreCursor = () => {
+    document.body.classList.remove('cursor-hidden');
+    document.removeEventListener('mousemove', restoreCursor);
+    document.removeEventListener('touchstart', restoreCursor);
+  };
+  document.addEventListener('mousemove', restoreCursor, { once: true });
+  document.addEventListener('touchstart', restoreCursor, { once: true });
+
   clearTimeout(hpLockTimer);
   hpLockTimer = setTimeout(() => {
     positionHoverPanel(cardEl);
