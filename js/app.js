@@ -1191,31 +1191,28 @@ function showHoverPanel(champ, cardEl) {
   hpSynergySearchOpen   = false;
   renderHoverPanel(champ.id);
   tooltipEl.classList.remove('hidden');
-  positionHoverPanel(cardEl); // position immediately so tooltip doesn't flash at old location
+  positionHoverPanel(cardEl);
 
-  // Find the actual card element (cardEl may be the hover-zone child)
-  const actualCard = cardEl.closest('.champ-card') || cardEl;
-
-  // Scroll so the card sits about 15% from the top of the viewport,
-  // keeping the card visible while leaving max room for the tooltip below.
-  hpProgrammaticScroll = true;
-  const addScreen = document.getElementById('add-screen');
-  if (addScreen) {
-    const cardRect = actualCard.getBoundingClientRect();
-    const screenRect = addScreen.getBoundingClientRect();
-    const scrollDelta = cardRect.top - screenRect.top + addScreen.scrollTop - 5;
-    addScreen.scrollTo({ top: Math.max(0, scrollDelta), behavior: 'smooth' });
+  if (isTouchDevice) {
+    // Mobile: scroll the card to the top so the tooltip has room below.
+    // Lock hover during scroll to prevent competing panels.
+    const actualCard = cardEl.closest('.champ-card') || cardEl;
+    hpProgrammaticScroll = true;
+    hpLocked = true;
+    const addScreen = document.getElementById('add-screen');
+    if (addScreen) {
+      const cardRect = actualCard.getBoundingClientRect();
+      const screenRect = addScreen.getBoundingClientRect();
+      const scrollDelta = cardRect.top - screenRect.top + addScreen.scrollTop - 5;
+      addScreen.scrollTo({ top: Math.max(0, scrollDelta), behavior: 'smooth' });
+    }
+    clearTimeout(hpLockTimer);
+    hpLockTimer = setTimeout(() => {
+      positionHoverPanel(cardEl);
+      hpProgrammaticScroll = false;
+      hpLocked = false;
+    }, 600);
   }
-  // Lock hover during the scroll animation so cards sliding under the
-  // touch/mouse position don't trigger competing hover panels.
-  hpLocked = true;
-
-  clearTimeout(hpLockTimer);
-  hpLockTimer = setTimeout(() => {
-    positionHoverPanel(cardEl);
-    hpProgrammaticScroll = false;
-    hpLocked = false;
-  }, 600);
 
   tooltipEl.onmouseenter = () => clearTimeout(hpTimeout);
   tooltipEl.onmouseleave = (e) => {
