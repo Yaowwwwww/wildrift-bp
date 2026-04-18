@@ -1641,6 +1641,10 @@ body.lang-en .champ-card.hp-active .champ-name .en { color: #f5f0a0; }
   body.lang-cn .lang-knob { transform: translateX(24px); }
 
   .lane-tabs {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: #000;
     padding: 8px 12px 0;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
