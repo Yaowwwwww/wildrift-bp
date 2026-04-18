@@ -1184,10 +1184,17 @@ function showHoverPanel(champ, cardEl) {
   // Find the actual card element (cardEl may be the hover-zone child)
   const actualCard = cardEl.closest('.champ-card') || cardEl;
 
-  // Scroll the card to the top of the viewport so there's maximum room
-  // for the tooltip below. Works on both desktop and mobile.
+  // Scroll so the card sits about 15% from the top of the viewport,
+  // keeping the card visible while leaving max room for the tooltip below.
   hpProgrammaticScroll = true;
-  actualCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  const addScreen = document.getElementById('add-screen');
+  if (addScreen) {
+    const cardRect = actualCard.getBoundingClientRect();
+    const screenRect = addScreen.getBoundingClientRect();
+    const targetY = window.innerHeight * 0.15;
+    const scrollDelta = cardRect.top - screenRect.top - targetY + addScreen.scrollTop;
+    addScreen.scrollTo({ top: Math.max(0, scrollDelta), behavior: 'smooth' });
+  }
   setTimeout(() => {
     positionHoverPanel(cardEl);
     hpProgrammaticScroll = false;

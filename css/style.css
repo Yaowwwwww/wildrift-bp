@@ -192,7 +192,7 @@ input  { font-family: inherit; }
   cursor: pointer;
   position: relative;
   user-select: none;
-  scroll-margin-top: 50px;
+  scroll-margin-top: 10px;
 }
 
 .champ-img-wrap {
