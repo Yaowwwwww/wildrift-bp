@@ -999,11 +999,16 @@ function buildCard(champ, mode) {
     }
     lastTapTime = now;
 
-    // Single click — show/dismiss hover (delayed to detect possible double)
+    // Single click — delayed to allow double-tap detection.
+    // If hover is already showing for THIS champ → dismiss.
+    // If no hover or a different champ's hover → show this champ's hover.
     setTimeout(() => {
       if (Date.now() - lastTapTime < DOUBLE_TAP_MS) return; // second tap incoming
-      if (hpSourceCard === card && !tooltipEl.classList.contains('hidden')) {
+      if (currentCardPanelId === champ.id && !tooltipEl.classList.contains('hidden')) {
         hideHoverPanel();
+      } else {
+        clearTimeout(hpShowTimeout);
+        showHoverPanel(champ, hoverZone);
       }
     }, DOUBLE_TAP_MS);
   });
