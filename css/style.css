@@ -82,6 +82,13 @@ input  { font-family: inherit; }
   align-items: center;
   gap: 6px;
 }
+/* Auth button border + text color follows sync-dot state (desktop + mobile) */
+.auth-row .auth-btn {
+  transition: border-color 0.3s ease, color 0.3s ease;
+}
+.auth-row .sync-dot.syncing ~ .auth-btn { border-color: #f0e68c; color: #f0e68c; }
+.auth-row .sync-dot.saved ~ .auth-btn { border-color: #6fcf7a; color: #6fcf7a; }
+.auth-row .sync-dot.sync-error ~ .auth-btn { border-color: #e06c6c; color: #e06c6c; }
 
 .btn-back {
   background: transparent;
@@ -1978,9 +1985,9 @@ body.lang-en .champ-card.hp-active .champ-name .en { color: #f5f0a0; }
   .auth-row .sync-dot {
     margin: 0;
   }
-  .auth-row .sync-dot.syncing ~ .auth-btn { border-color: #f0e68c; }
-  .auth-row .sync-dot.saved ~ .auth-btn { border-color: #6fcf7a; }
-  .auth-row .sync-dot.sync-error ~ .auth-btn { border-color: #e06c6c; }
+  .auth-row .sync-dot.syncing ~ .auth-btn { border-color: #f0e68c; color: #f0e68c; }
+  .auth-row .sync-dot.saved ~ .auth-btn { border-color: #6fcf7a; color: #6fcf7a; }
+  .auth-row .sync-dot.sync-error ~ .auth-btn { border-color: #e06c6c; color: #e06c6c; }
   .header-right .export-btn,
   .header-right #import-btn {
     flex: 1;
