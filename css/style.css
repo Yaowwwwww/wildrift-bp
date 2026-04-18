@@ -30,7 +30,7 @@ input  { font-family: inherit; }
 /* ===== SCREEN HEADER ===== */
 .screen-header {
   display: flex;
-  align-items: center;
+  align-items: stretch;
   gap: 16px;
   padding: 18px 20px;
   border-bottom: 1px solid #2a2a2a;
@@ -72,15 +72,24 @@ input  { font-family: inherit; }
 
 .header-right {
   margin-left: auto;
-  display: inline-flex;
+  display: flex;
+  flex-wrap: wrap;
+  align-content: center;
   align-items: center;
-  gap: 12px;
+  justify-content: flex-end;
+  gap: 10px;
   flex-shrink: 0;
+  max-width: 360px;
 }
 .auth-row {
-  display: inline-flex;
+  display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
+  width: 100%;
+  justify-content: flex-end;
+}
+.auth-row .auth-btn {
+  flex: 1;
 }
 /* Auth button border + text color follows sync-dot state (desktop + mobile) */
 .auth-row .auth-btn {

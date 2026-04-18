@@ -1193,6 +1193,7 @@ function showHoverPanel(champ, cardEl) {
   hpSynergySearchOpen   = false;
   renderHoverPanel(champ.id);
   tooltipEl.classList.remove('hidden');
+  tooltipEl.scrollTop = 0;
   hpShownAt = Date.now();
   positionHoverPanel(cardEl);
 
