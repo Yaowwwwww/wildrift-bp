@@ -492,9 +492,18 @@ input  { font-family: inherit; }
   font-weight: 600;
   letter-spacing: 0.5px;
 }
+.hp-chain-list {
+  list-style: disc;
+  padding-left: 18px;
+  margin: 4px 0;
+}
+.hp-chain-list li {
+  padding: 2px 0;
+}
+
 .hp-kw {
   color: #ccc;
-  display: inline-block;
+  display: inline;
   position: relative;
   padding: 1px 4px;
   font-weight: 600;
@@ -1632,16 +1641,18 @@ body.lang-en .champ-card.hp-active .champ-name .en { color: #f5f0a0; }
   body.lang-cn .lang-knob { transform: translateX(24px); }
 
   .lane-tabs {
-    padding: 8px 10px 0;
+    padding: 8px 12px 0;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
   }
   .lane-tabs::-webkit-scrollbar { display: none; }
   .lane-tab {
-    padding: 7px 11px;
-    font-size: 0.78rem;
-    letter-spacing: 1px;
+    padding: 10px 16px;
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
     flex-shrink: 0;
   }
 
