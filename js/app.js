@@ -1233,7 +1233,7 @@ function positionHoverPanel(cardEl) {
   // Tooltip fills from the card's bottom edge to the visible viewport bottom.
   // Use visualViewport for accurate mobile measurement (accounts for URL bar, keyboard, etc.)
   const vpHeight = (window.visualViewport && window.visualViewport.height) || window.innerHeight;
-  const availableHeight = vpHeight - ref.bottom - 12;
+  const availableHeight = vpHeight - ref.bottom;
 
   const h = Math.max(120, Math.floor(availableHeight));
   tooltipEl.style.top = Math.floor(ref.bottom) + 'px';
