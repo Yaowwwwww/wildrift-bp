@@ -451,11 +451,11 @@ input  { font-family: inherit; }
 .champ-card.hp-active .champ-name .en { color: #b8a840; }
 
 .hp-champ-header {
-  font-size: 0.75rem;
+  font-size: 0.95rem;
   font-weight: 600;
   color: #fff;
   letter-spacing: 1px;
-  padding: 7px 10px 6px;
+  padding: 9px 12px 8px;
   border-bottom: 1px solid #222;
   white-space: nowrap;
   overflow: hidden;
@@ -472,7 +472,7 @@ input  { font-family: inherit; }
 }
 
 .hp-section {
-  padding: 6px 10px 8px;
+  padding: 8px 12px 10px;
 }
 
 .hp-divider {
@@ -481,21 +481,23 @@ input  { font-family: inherit; }
 }
 
 .hp-hint {
-  font-size: 10px;
-  color: #666;
-  line-height: 1.4;
-  padding: 2px 10px;
+  font-size: 0.82rem;
+  color: #888;
+  line-height: 1.8;
+  padding: 6px 12px;
 }
 .hp-hint-label {
-  color: #888;
-  font-size: 9px;
+  color: #bbb;
+  font-size: 0.82rem;
+  font-weight: 600;
   letter-spacing: 0.5px;
 }
 .hp-kw {
-  color: #aaa;
+  color: #ccc;
   display: inline-block;
   position: relative;
-  padding: 0 3px;
+  padding: 1px 4px;
+  font-weight: 600;
   transition: color 0.15s ease, transform 0.15s ease, text-shadow 0.15s ease;
   cursor: default;
 }
@@ -514,7 +516,7 @@ input  { font-family: inherit; }
 }
 
 .hp-section-title {
-  font-size: 0.75rem;
+  font-size: 0.9rem;
   font-weight: 600;
   color: #e0e0e0;
   letter-spacing: 1px;
@@ -548,8 +550,8 @@ input  { font-family: inherit; }
   background: rgba(240,230,140,0.08);
   border: 1px solid #f0e68c;
   color: #f0e68c;
-  font-size: 0.68rem;
-  padding: 2px 6px 2px 8px;
+  font-size: 0.82rem;
+  padding: 3px 8px 3px 10px;
   display: inline-flex;
   align-items: center;
   gap: 4px;
@@ -565,7 +567,7 @@ input  { font-family: inherit; }
   background: transparent;
   border: none;
   color: #666;
-  font-size: 0.75rem;
+  font-size: 0.88rem;
   padding: 0;
   line-height: 1;
   transition: color 0.12s;
@@ -622,12 +624,12 @@ input  { font-family: inherit; }
 .hp-counter-item {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 2px 5px 2px 3px;
+  gap: 8px;
+  padding: 4px 6px 4px 4px;
 }
 .hp-counter-item img {
-  width: 22px;
-  height: 22px;
+  width: 26px;
+  height: 26px;
   object-fit: cover;
   border: 1px solid #333;
   flex-shrink: 0;
@@ -646,7 +648,7 @@ input  { font-family: inherit; }
 
 .hp-counter-item span {
   flex: 1;
-  font-size: 0.72rem;
+  font-size: 0.88rem;
   color: #fff;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -699,8 +701,8 @@ input  { font-family: inherit; }
 
 .hp-empty {
   color: #888;
-  font-size: 0.7rem;
-  padding: 2px 0;
+  font-size: 0.82rem;
+  padding: 4px 0;
   font-style: italic;
 }
 
