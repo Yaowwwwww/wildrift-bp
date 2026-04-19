@@ -1034,41 +1034,34 @@ input  { font-family: inherit; }
   transform: scale(1.03);
   box-shadow: 0 0 0 1px rgba(240,230,140,0.4), inset 0 0 16px rgba(240,230,140,0.06);
 }
-.title-box:hover h2 {
-  color: #fff8b0;
-  text-shadow: 0 0 12px rgba(240,230,140,0.7);
-}
-.title-box:hover .title-desc {
-  color: #c8b84a;
-}
-/* corner accents */
-.title-box::before,
-.title-box::after {
-  content: '';
+/* corner accents — all four corners */
+.title-corner {
   position: absolute;
-  width: 5px;
-  height: 5px;
+  width: 6px;
+  height: 6px;
   border-color: #f0e68c;
   border-style: solid;
 }
-.title-box::before {
-  top: -3px;
-  left: -3px;
-  border-width: 1px 0 0 1px;
-}
-.title-box::after {
-  bottom: -3px;
-  right: -3px;
-  border-width: 0 1px 1px 0;
-}
+.title-corner-tl { top: -3px; left: -3px; border-width: 1px 0 0 1px; }
+.title-corner-tr { top: -3px; right: -3px; border-width: 1px 1px 0 0; }
+.title-corner-bl { bottom: -3px; left: -3px; border-width: 0 0 1px 1px; }
+.title-corner-br { bottom: -3px; right: -3px; border-width: 0 1px 1px 0; }
 
 #add-screen .screen-header h2 {
   font-size: 1.15rem;
   font-weight: 700;
   letter-spacing: 3px;
-  color: #f0e68c;
+  color: #ffe680;
   text-transform: uppercase;
   transition: color 0.2s ease, text-shadow 0.2s ease;
+}
+.title-box:hover h2 {
+  color: #fff8b0;
+  text-shadow: 0 0 10px rgba(255, 230, 128, 0.8),
+               0 0 20px rgba(255, 230, 128, 0.4);
+}
+.title-box:hover .title-desc {
+  color: #fff;
 }
 
 .title-desc {
@@ -1077,7 +1070,6 @@ input  { font-family: inherit; }
   letter-spacing: 0.5px;
   margin-top: 5px;
   line-height: 1.5;
-  transition: color 0.2s ease;
 }
 
 /* Footer at the very bottom of #add-screen, separated by a hairline divider */
@@ -1232,20 +1224,21 @@ input  { font-family: inherit; }
   background: transparent;
   border: 1px solid #555;
   color: #888;
-  width: 22px;
-  height: 22px;
-  font-size: 0.72rem;
-  display: flex;
+  width: 14px;
+  height: 14px;
+  font-size: 0.55rem;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   padding: 0;
   margin-left: 6px;
-  transition: border-color 0.15s ease, color 0.15s ease;
+  transition: border-color 0.15s ease, color 0.15s ease, background 0.15s ease;
 }
 .filter-clear-btn:hover {
   border-color: #e06c6c;
-  color: #e06c6c;
+  color: #fff;
+  background: #e06c6c;
 }
 
 /* ===== KEYWORD CHIPS ===== */
