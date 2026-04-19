@@ -1733,13 +1733,14 @@ body.lang-en .champ-card.hp-active .champ-name .en { color: #f5f0a0; }
     position: sticky;
     top: 0;
     z-index: 100;
-    background: #000;
-    padding: 8px 12px 0;
+    background: #111;
+    padding: 8px 12px 8px;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
-    border-bottom: 1px dashed #2a2a2a !important;
-    display: flex !important;
+    border-bottom: 2px dashed #f0e68c;
+    display: flex;
+    min-height: 44px;
   }
   .lane-tabs::-webkit-scrollbar { display: none; }
   .lane-tab {
