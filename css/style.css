@@ -1334,7 +1334,8 @@ input  { font-family: inherit; }
   border: 1.5px solid #c55;
   color: #e88;
   background: #111;
-  font-size: 13px;
+  font-size: 11px;
+  text-align: center;
 }
 /* Hover zones (kept in DOM but no longer used for split detection) */
 .kw-zone { display: none; }
