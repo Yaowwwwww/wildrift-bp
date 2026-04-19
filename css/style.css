@@ -87,6 +87,7 @@ input  { font-family: inherit; }
   gap: 8px;
   width: 100%;
   justify-content: flex-end;
+  order: -1;
 }
 .auth-row .auth-btn {
   flex: 1;
@@ -1069,7 +1070,7 @@ input  { font-family: inherit; }
 }
 
 .title-desc {
-  font-size: 0.78rem;
+  font-size: 0.92rem;
   color: #fff;
   letter-spacing: 0.5px;
   margin-top: 5px;

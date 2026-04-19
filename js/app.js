@@ -1216,10 +1216,12 @@ function showHoverPanel(champ, cardEl) {
       hpLocked = false;
     }, 600);
   } else {
-    // Desktop: show immediately, no scroll
+    // Desktop: show immediately, position in sync
     tooltipEl.classList.remove('hidden');
     hpShownAt = Date.now();
     positionHoverPanel(cardEl);
+    // Re-position after a frame to catch any layout shift
+    requestAnimationFrame(() => positionHoverPanel(cardEl));
   }
 
   tooltipEl.onmouseenter = () => clearTimeout(hpTimeout);
