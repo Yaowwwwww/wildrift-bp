@@ -1090,6 +1090,8 @@ input  { font-family: inherit; }
   letter-spacing: 0.5px;
   margin-top: 5px;
   line-height: 1.3;
+  font-weight: 600;
+  max-width: 340px;
 }
 
 /* Footer at the very bottom of #add-screen, separated by a hairline divider */
