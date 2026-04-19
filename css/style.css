@@ -1144,7 +1144,7 @@ input  { font-family: inherit; }
 .visit-bubble {
   position: absolute;
   top: 50%;
-  right: -24px;
+  right: -12px;
   transform: translateY(-50%);
   color: #f0e68c;
   font-size: 0.62rem;
