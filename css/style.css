@@ -1127,25 +1127,24 @@ input  { font-family: inherit; }
 }
 .visit-bubble {
   position: absolute;
-  top: 50%;
-  right: -32px;
-  transform: translateY(-50%);
+  top: 0;
+  right: -8px;
   color: #f0e68c;
   font-size: 0.75rem;
   font-weight: 600;
   letter-spacing: 0;
   pointer-events: none;
-  filter: blur(0.4px);
+  filter: blur(0.3px);
   opacity: 0;
   z-index: 100;
   white-space: nowrap;
-  animation: visit-bubble-fly 1.4s ease-out forwards;
+  animation: visit-bubble-fly 1.2s ease-out forwards;
 }
 @keyframes visit-bubble-fly {
-  0%   { opacity: 0; transform: translateY(-50%) translateX(-4px); }
-  15%  { opacity: 0.7; transform: translateY(-50%) translateX(0); }
-  50%  { opacity: 0.5; transform: translateY(-50%) translateX(6px); }
-  100% { opacity: 0; transform: translateY(-50%) translateX(18px); }
+  0%   { opacity: 0; transform: translateY(0); }
+  15%  { opacity: 0.7; transform: translateY(-4px); }
+  50%  { opacity: 0.4; transform: translateY(-12px); }
+  100% { opacity: 0; transform: translateY(-22px); }
 }
 
 #add-screen .screen-header h2 .title-sep {
