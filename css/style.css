@@ -1744,8 +1744,11 @@ body.lang-en .champ-card.hp-active .champ-name .en { color: #f5f0a0; }
     padding: 5px 12px;
   }
   .keyword-chips .kw-chip-plus {
-    padding: 5px;
-    font-size: 0.78rem;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    font-size: 1rem;
+    align-self: center;
   }
   /* Mobile: show both star + x on chip hover (no zone-based split) */
   .kw-chip:hover .kw-chip-star,
@@ -1754,7 +1757,10 @@ body.lang-en .champ-card.hp-active .champ-name .en { color: #f5f0a0; }
     pointer-events: auto;
   }
   .search-wrap {
-    padding: 0 12px;
+    padding: 8px 12px 0;
+  }
+  .search-wrap input {
+    border-radius: 4px;
   }
   .tagline-wrap {
     margin: 6px 12px 0;
