@@ -1360,9 +1360,15 @@ input  { font-family: inherit; }
 .kw-chip-plus {
   border-style: solid;
   color: #aaa;
-  padding: 4px 10px;
-  font-size: 0.9rem;
+  padding: 0;
+  width: 38px;
+  height: 38px;
+  font-size: 1.1rem;
+  font-weight: 700;
   line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 .kw-chip-plus:hover { border-color: #bbb; color: #fff; }
 .kw-chip-plus.active { border-color: #f0e68c; color: #f0e68c; background: rgba(240,230,140,0.08); }
