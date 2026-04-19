@@ -369,7 +369,7 @@ input  { font-family: inherit; }
   width: 16px;
   height: 16px;
   box-sizing: border-box;
-  border: 2px solid rgba(255, 255, 255, 0.85);
+  border: 1px solid #f0e68c;
   transition: border-color 0.15s ease, background 0.15s ease, transform 0.15s ease;
 }
 .champ-card:hover .card-badge-hollow {
@@ -407,7 +407,7 @@ input  { font-family: inherit; }
   width: 16px;
   height: 16px;
   background: #000;
-  border: 2px solid #fff;
+  border: 1px solid #f0e68c;
   color: #fff;
   font-size: 11px;
   line-height: 1;
