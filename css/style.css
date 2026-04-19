@@ -174,7 +174,7 @@ input  { font-family: inherit; }
 }
 .tagline-text {
   font-family: inherit;
-  font-size: calc(1rem + 5px);
+  font-size: 1.05rem;
   font-weight: 700;
   letter-spacing: 0.8px;
   color: #fff;
@@ -194,7 +194,7 @@ input  { font-family: inherit; }
 }
 .lang-cn .tagline-text {
   letter-spacing: 1.5px;
-  font-size: 0.88rem;
+  font-size: 1.05rem;
 }
 
 /* ===== CHAMPION GRID ===== */
@@ -1697,11 +1697,11 @@ body.lang-en .champ-card.hp-active .champ-name .en { color: #f5f0a0; }
     padding: 0 12px;
   }
   .tagline-wrap {
-    margin: 0 12px;
-    padding: 4px 0;
+    margin: 6px 12px 0;
+    padding: 16px 0;
   }
   .tagline-text {
-    font-size: 0.92rem;
+    font-size: 0.72rem;
     letter-spacing: 0.4px;
     white-space: normal;
     text-align: center;
