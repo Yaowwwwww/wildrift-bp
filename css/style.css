@@ -1261,7 +1261,7 @@ input  { font-family: inherit; }
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
-  padding: 10px 20px 0;
+  padding: 10px 20px 10px;
 }
 
 .kw-chip {
@@ -1391,9 +1391,9 @@ input  { font-family: inherit; }
   border-style: solid;
   color: #aaa;
   padding: 0;
-  width: 38px;
-  height: 38px;
-  font-size: 1.1rem;
+  width: 28px;
+  height: 28px;
+  font-size: 0.95rem;
   font-weight: 700;
   line-height: 1;
   display: inline-flex;
@@ -1738,8 +1738,9 @@ body.lang-en .champ-card.hp-active .champ-name .en { color: #f5f0a0; }
     padding: 5px 12px;
   }
   .keyword-chips .kw-chip-plus {
-    width: 34px;
-    height: 34px;
+    width: 26px;
+    height: 26px;
+    font-size: 0.85rem;
   }
   /* Mobile: show both star + x on chip hover (no zone-based split) */
   .kw-chip:hover .kw-chip-star,
