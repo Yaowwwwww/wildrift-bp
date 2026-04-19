@@ -1151,9 +1151,9 @@ input  { font-family: inherit; }
 }
 @keyframes visit-bubble-fly {
   0%   { opacity: 0; transform: translateY(-50%) translateX(0); }
-  15%  { opacity: 0.6; transform: translateY(-55%) translateX(2px); }
-  50%  { opacity: 0.3; transform: translateY(-70%) translateX(3px); }
-  100% { opacity: 0; transform: translateY(-120%) translateX(4px); }
+  15%  { opacity: 0.8; transform: translateY(-55%) translateX(6px); }
+  50%  { opacity: 0.5; transform: translateY(-70%) translateX(10px); }
+  100% { opacity: 0; transform: translateY(-120%) translateX(14px); }
 }
 
 #add-screen .screen-header h2 .title-sep {
