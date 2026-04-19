@@ -1111,10 +1111,14 @@ input  { font-family: inherit; }
   letter-spacing: 1.2px;
   font-weight: 400;
 }
+.footer-copyright { flex: 1; text-align: left; }
 .footer-visits {
   position: relative;
   z-index: 10;
+  flex: 0 0 auto;
+  text-align: center;
 }
+.title-version { flex: 1; text-align: right; }
 .footer-visits #visit-count {
   color: #f0e68c;
   font-weight: 600;
