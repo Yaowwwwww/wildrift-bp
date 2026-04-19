@@ -83,9 +83,9 @@ input  { font-family: inherit; }
   align-content: center;
   align-items: center;
   justify-content: flex-end;
-  gap: 10px;
+  gap: 8px;
   flex-shrink: 0;
-  max-width: 480px;
+  max-width: 420px;
 }
 .auth-row {
   display: flex;
@@ -1056,14 +1056,9 @@ input  { font-family: inherit; }
   transform: scale(1.02);
   box-shadow: 0 0 0 1px rgba(240,230,140,0.4), inset 0 0 16px rgba(240,230,140,0.06);
 }
-/* Logo + title-box scale together when hovering either one */
-.screen-header:has(.title-box:hover) .nav-logo,
-.screen-header:has(.nav-logo:hover) .nav-logo {
+/* Logo hover independently */
+.nav-logo:hover {
   transform: scale(1.04);
-}
-.screen-header:has(.nav-logo:hover) .title-box {
-  transform: scale(1.02);
-  box-shadow: 0 0 0 1px rgba(240,230,140,0.4), inset 0 0 16px rgba(240,230,140,0.06);
 }
 /* corner accents — all four corners */
 .title-corner {
@@ -1550,10 +1545,10 @@ input  { font-family: inherit; }
   border: 1px solid #fff;
   color: #fff;
   font-weight: 700;
-  font-size: 0.86rem;
-  letter-spacing: 1.2px;
-  padding: 8px 18px;
-  margin-right: 14px;
+  font-size: 0.82rem;
+  letter-spacing: 1px;
+  padding: 6px 12px;
+  margin-right: 0;
   cursor: pointer;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -1679,8 +1674,8 @@ body.lang-en .champ-card.hp-active .champ-name .en { color: #f5f0a0; }
     row-gap: 8px;
   }
   .nav-logo {
-    width: 72px;
-    height: 48px;
+    width: 96px;
+    height: 64px;
   }
   .title-box {
     flex: 1 1 0;
