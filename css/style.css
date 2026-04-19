@@ -1316,24 +1316,13 @@ input  { font-family: inherit; }
   background: #111;
   font-size: 13px;
 }
-/* Invisible corner hover zones that reveal only the adjacent icon */
-.kw-zone {
-  position: absolute;
-  top: -10px;
-  width: 50%;
-  height: 22px;
-  z-index: 1;
-  pointer-events: auto;
-}
-.kw-zone-tl { left: -10px; }
-.kw-zone-tr { right: -10px; }
+/* Hover zones (kept in DOM but no longer used for split detection) */
+.kw-zone { display: none; }
 
-.kw-zone-tl:hover ~ .kw-chip-star,
-.kw-chip-star:hover {
-  opacity: 1;
-  pointer-events: auto;
-}
-.kw-zone-tr:hover ~ .kw-chip-x,
+/* Show both star + x when hovering the chip */
+.kw-chip:hover .kw-chip-star,
+.kw-chip:hover .kw-chip-x,
+.kw-chip-star:hover,
 .kw-chip-x:hover {
   opacity: 1;
   pointer-events: auto;
@@ -1744,8 +1733,8 @@ body.lang-en .champ-card.hp-active .champ-name .en { color: #f5f0a0; }
     padding: 5px 12px;
   }
   .keyword-chips .kw-chip-plus {
-    width: 28px;
-    height: 28px;
+    width: 25px;
+    height: 25px;
     padding: 0;
     font-size: 1rem;
     align-self: center;
