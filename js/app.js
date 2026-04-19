@@ -1192,14 +1192,11 @@ function showHoverPanel(champ, cardEl) {
   hpBeCounterSearchOpen = false;
   hpSynergySearchOpen   = false;
   renderHoverPanel(champ.id);
-  tooltipEl.classList.remove('hidden');
   tooltipEl.scrollTop = 0;
-  hpShownAt = Date.now();
-  positionHoverPanel(cardEl);
 
   if (isTouchDevice) {
-    // Mobile: scroll the card to the top so the tooltip has room below.
-    // Lock hover during scroll to prevent competing panels.
+    // Mobile: scroll the card to the top FIRST, then show tooltip after
+    // scroll settles — avoids the "flash at old position then jump" effect.
     const actualCard = cardEl.closest('.champ-card') || cardEl;
     hpProgrammaticScroll = true;
     hpLocked = true;
@@ -1212,10 +1209,17 @@ function showHoverPanel(champ, cardEl) {
     }
     clearTimeout(hpLockTimer);
     hpLockTimer = setTimeout(() => {
+      tooltipEl.classList.remove('hidden');
+      hpShownAt = Date.now();
       positionHoverPanel(cardEl);
       hpProgrammaticScroll = false;
       hpLocked = false;
     }, 600);
+  } else {
+    // Desktop: show immediately, no scroll
+    tooltipEl.classList.remove('hidden');
+    hpShownAt = Date.now();
+    positionHoverPanel(cardEl);
   }
 
   tooltipEl.onmouseenter = () => clearTimeout(hpTimeout);
