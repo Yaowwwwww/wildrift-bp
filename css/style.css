@@ -376,7 +376,7 @@ input  { font-family: inherit; }
   opacity: 1;
 }
 .champ-card:hover .card-badge-hollow::after {
-  border-color: #f0e68c;
+  border-color: #ffffff;
   border-width: 2px;
 }
 .card-badge-hollow:hover::after {
@@ -1705,9 +1705,8 @@ body.lang-en .champ-card.hp-active .champ-name .en { color: #f5f0a0; }
     padding: 5px 12px;
   }
   .keyword-chips .kw-chip-plus {
-    flex-basis: 100%;
-    width: 100%;
-    height: 32px;
+    width: 34px;
+    height: 34px;
   }
   .search-wrap {
     padding: 0 12px;
