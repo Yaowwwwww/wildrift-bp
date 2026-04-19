@@ -1400,10 +1400,6 @@ input  { font-family: inherit; }
   align-items: center;
   justify-content: center;
 }
-.kw-chip-break {
-  flex-basis: 100%;
-  height: 0;
-}
 .kw-chip-plus:hover { border-color: #bbb; color: #fff; }
 .kw-chip-plus.active { border-color: #f0e68c; color: #f0e68c; background: rgba(240,230,140,0.08); }
 

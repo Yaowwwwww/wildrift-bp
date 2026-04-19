@@ -690,11 +690,6 @@ function buildKeywordChips() {
     container.appendChild(btn);
   });
 
-  // Line break before "+" button
-  const lineBreak = document.createElement('div');
-  lineBreak.className = 'kw-chip-break';
-  container.appendChild(lineBreak);
-
   // "+" add chip at end
   const plusBtn = document.createElement('button');
   plusBtn.className = 'kw-chip kw-chip-plus' + (kwPanelOpen ? ' active' : '');
