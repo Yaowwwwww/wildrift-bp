@@ -178,7 +178,8 @@ input  { font-family: inherit; }
   font-weight: 700;
   letter-spacing: 0.8px;
   color: #fff;
-  text-shadow: 0 0 4px rgba(255, 255, 255, 0.2),
+  text-shadow: 0 0 6px rgba(255, 255, 255, 0.35),
+               0 0 14px rgba(255, 255, 255, 0.15),
                0 1px 2px rgba(0, 0, 0, 0.8);
   white-space: nowrap;
   cursor: default;
@@ -1702,6 +1703,11 @@ body.lang-en .champ-card.hp-active .champ-name .en { color: #f5f0a0; }
   .keyword-chips .kw-chip {
     font-size: 0.78rem;
     padding: 5px 12px;
+  }
+  .keyword-chips .kw-chip-plus {
+    flex-basis: 100%;
+    width: 100%;
+    height: 32px;
   }
   .search-wrap {
     padding: 0 12px;

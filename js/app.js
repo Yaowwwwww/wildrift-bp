@@ -836,8 +836,9 @@ function renderAddGrid() {
 
   // Order: starred → selected junglers → selected non-junglers → unselected
   // Sort helper: most recently acted-on first (descending timestamp)
-  const byStarTime = (a, b) => ((state.starTimestamps[b.id] || 0) - (state.starTimestamps[a.id] || 0));
-  const byPoolTime = (a, b) => ((state.poolTimestamps[b.id] || 0) - (state.poolTimestamps[a.id] || 0));
+  // Sort ascending: earliest first, most recently added last
+  const byStarTime = (a, b) => ((state.starTimestamps[a.id] || 0) - (state.starTimestamps[b.id] || 0));
+  const byPoolTime = (a, b) => ((state.poolTimestamps[a.id] || 0) - (state.poolTimestamps[b.id] || 0));
 
   let selStarred   = champs.filter(c =>  state.pool.has(c.id) &&  state.starred.has(c.id)).sort(byStarTime);
   let selJungle    = champs.filter(c =>  state.pool.has(c.id) && !state.starred.has(c.id) &&  state.junglers.has(c.id)).sort(byPoolTime);
