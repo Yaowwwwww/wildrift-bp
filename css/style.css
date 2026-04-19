@@ -1039,6 +1039,8 @@ input  { font-family: inherit; }
 #add-screen {
   overflow-y: auto;
   height: 100vh;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
 .title-box {
@@ -1087,7 +1089,7 @@ input  { font-family: inherit; }
   font-size: 0.92rem;
   color: #fff;
   letter-spacing: 0.5px;
-  margin-top: 2px;
+  margin-top: 5px;
   line-height: 1.3;
 }
 
