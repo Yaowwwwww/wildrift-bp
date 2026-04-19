@@ -1159,8 +1159,8 @@ input  { font-family: inherit; }
 }
 @keyframes visit-bubble-fly {
   0%   { opacity: 0; transform: translateY(-50%) translateX(0); }
-  15%  { opacity: 0.7; transform: translateY(-80%) translateX(0); }
-  50%  { opacity: 0.45; transform: translateY(-140%) translateX(0); }
+  15%  { opacity: 0.9; transform: translateY(-80%) translateX(0); }
+  50%  { opacity: 0.6; transform: translateY(-140%) translateX(0); }
   100% { opacity: 0; transform: translateY(-220%) translateX(0); }
 }
 
@@ -1432,8 +1432,8 @@ input  { font-family: inherit; }
   border: none;
   border-bottom: 1px solid #333;
   color: #ddd;
-  font-size: 0.8rem;
-  padding: 3px 0 4px;
+  font-size: 1rem;
+  padding: 6px 0;
   outline: none;
   font-family: inherit;
 }
@@ -1444,10 +1444,10 @@ input  { font-family: inherit; }
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  margin-top: 8px;
+  margin-top: 10px;
   cursor: pointer;
   user-select: none;
-  font-size: 0.82rem;
+  font-size: 1rem;
   color: #bbb;
   letter-spacing: 0.5px;
 }
@@ -1486,8 +1486,8 @@ input  { font-family: inherit; }
   background: transparent;
   border: 1px solid #3a3a3a;
   color: #888;
-  font-size: 0.7rem;
-  padding: 3px 10px;
+  font-size: 1rem;
+  padding: 6px 14px;
   letter-spacing: 0.5px;
   cursor: pointer;
   transition: all 0.12s;
