@@ -1725,6 +1725,12 @@ body.lang-en .champ-card.hp-active .champ-name .en { color: #f5f0a0; }
     width: 34px;
     height: 34px;
   }
+  /* Mobile: show both star + x on chip hover (no zone-based split) */
+  .kw-chip:hover .kw-chip-star,
+  .kw-chip:hover .kw-chip-x {
+    opacity: 1;
+    pointer-events: auto;
+  }
   .search-wrap {
     padding: 0 12px;
   }
