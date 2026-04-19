@@ -386,24 +386,30 @@ input  { font-family: inherit; }
   justify-content: flex-end;
 }
 .card-badge-hollow::after {
-  content: '';
+  content: '✓';
   width: 16px;
   height: 16px;
   box-sizing: border-box;
   border: 1px solid #f0e68c;
-  transition: border-color 0.15s ease, background 0.15s ease, transform 0.15s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 700;
+  color: transparent;
+  transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease, transform 0.15s ease;
 }
 .champ-card:hover .card-badge-hollow {
   opacity: 1;
 }
 .champ-card:hover .card-badge-hollow::after {
-  border-color: #ffffff;
-  border-width: 1.2px;
+  border-color: #fff;
 }
 .card-badge-hollow:hover::after {
+  background: #fff;
+  color: #000;
   border-color: #fff;
-  background: rgba(255, 255, 255, 0.9);
-  transform: scale(1.15);
+  transform: scale(1.1);
 }
 
 /* Star (pin to front) — 28×24 transparent hit area, 16×16 visual icon inside */
