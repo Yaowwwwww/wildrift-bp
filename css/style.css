@@ -1140,7 +1140,7 @@ input  { font-family: inherit; }
 .visit-bubble {
   position: absolute;
   top: 50%;
-  right: -6px;
+  right: -2px;
   transform: translateY(-50%);
   color: #f0e68c;
   font-size: 0.62rem;
@@ -1155,9 +1155,9 @@ input  { font-family: inherit; }
 }
 @keyframes visit-bubble-fly {
   0%   { opacity: 0; transform: translateY(-50%) translateX(0); }
-  15%  { opacity: 0.8; transform: translateY(-55%) translateX(6px); }
-  50%  { opacity: 0.5; transform: translateY(-70%) translateX(10px); }
-  100% { opacity: 0; transform: translateY(-120%) translateX(14px); }
+  15%  { opacity: 0.5; transform: translateY(-80%) translateX(0); }
+  50%  { opacity: 0.3; transform: translateY(-140%) translateX(0); }
+  100% { opacity: 0; transform: translateY(-220%) translateX(0); }
 }
 
 #add-screen .screen-header h2 .title-sep {
