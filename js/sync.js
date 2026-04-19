@@ -479,7 +479,7 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
   let tickTimer = null;
 
   function tickDelta() {
-    return Math.floor(Math.random() * 9) + 1; // 1..9
+    return Math.floor(Math.random() * 3) + 1; // 1..3
   }
   function nextTickDelay() {
     return 1000 + Math.floor(Math.random() * 4001); // 1000..5000ms
