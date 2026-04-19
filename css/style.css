@@ -35,6 +35,10 @@ input  { font-family: inherit; }
   padding: 18px 20px;
   border-bottom: 1px solid #2a2a2a;
   flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  z-index: 200;
+  background: #000;
 }
 
 .back-to-top {
@@ -1140,7 +1144,7 @@ input  { font-family: inherit; }
 .visit-bubble {
   position: absolute;
   top: 50%;
-  right: -2px;
+  right: -24px;
   transform: translateY(-50%);
   color: #f0e68c;
   font-size: 0.62rem;
@@ -1155,8 +1159,8 @@ input  { font-family: inherit; }
 }
 @keyframes visit-bubble-fly {
   0%   { opacity: 0; transform: translateY(-50%) translateX(0); }
-  15%  { opacity: 0.5; transform: translateY(-80%) translateX(0); }
-  50%  { opacity: 0.3; transform: translateY(-140%) translateX(0); }
+  15%  { opacity: 0.7; transform: translateY(-80%) translateX(0); }
+  50%  { opacity: 0.45; transform: translateY(-140%) translateX(0); }
   100% { opacity: 0; transform: translateY(-220%) translateX(0); }
 }
 
