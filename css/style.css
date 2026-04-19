@@ -377,7 +377,7 @@ input  { font-family: inherit; }
 }
 .champ-card:hover .card-badge-hollow::after {
   border-color: #ffffff;
-  border-width: 2px;
+  border-width: 1.2px;
 }
 .card-badge-hollow:hover::after {
   border-color: #fff;
