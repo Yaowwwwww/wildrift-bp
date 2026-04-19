@@ -21,6 +21,7 @@ const I18N = {
     my_pool: "My Champion Pool",
     filter_pool_only: "Pool only",
     filter_starred_only: "Starred only",
+    filter_clear: "✕",
     kw_mark_starred: "Mark as starred",
     kw_star_toggle: "Toggle star",
     kw_delete: "Delete",
@@ -108,6 +109,7 @@ const I18N = {
     my_pool: "我的英雄池",
     filter_pool_only: "英雄池",
     filter_starred_only: "星标",
+    filter_clear: "✕",
     kw_mark_starred: "标记为星标",
     kw_star_toggle: "切换星标",
     kw_delete: "删除",
@@ -866,6 +868,11 @@ function renderAddGrid() {
 
 }
 
+function updateFilterClearBtn() {
+  const btn = document.getElementById('filter-clear-btn');
+  if (btn) btn.classList.toggle('hidden', !filterPoolOnly && !filterStarredOnly);
+}
+
 function togglePoolFilter() {
   const el = document.getElementById('filter-pool-only');
   filterPoolOnly = !!(el && el.checked);
@@ -874,6 +881,7 @@ function togglePoolFilter() {
     const other = document.getElementById('filter-starred-only');
     if (other) other.checked = false;
   }
+  updateFilterClearBtn();
   renderAddGrid();
 }
 
@@ -885,6 +893,18 @@ function toggleStarredFilter() {
     const other = document.getElementById('filter-pool-only');
     if (other) other.checked = false;
   }
+  updateFilterClearBtn();
+  renderAddGrid();
+}
+
+function clearPoolFilters() {
+  filterPoolOnly = false;
+  filterStarredOnly = false;
+  const pool = document.getElementById('filter-pool-only');
+  const star = document.getElementById('filter-starred-only');
+  if (pool) pool.checked = false;
+  if (star) star.checked = false;
+  updateFilterClearBtn();
   renderAddGrid();
 }
 

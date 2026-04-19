@@ -1144,9 +1144,9 @@ input  { font-family: inherit; }
 }
 @keyframes visit-bubble-fly {
   0%   { opacity: 0; transform: translateY(-50%) translateX(0); }
-  15%  { opacity: 0.6; transform: translateY(-50%) translateX(4px); }
-  50%  { opacity: 0.3; transform: translateY(-55%) translateX(8px); }
-  100% { opacity: 0; transform: translateY(-60%) translateX(14px); }
+  15%  { opacity: 0.6; transform: translateY(-55%) translateX(2px); }
+  50%  { opacity: 0.3; transform: translateY(-70%) translateX(3px); }
+  100% { opacity: 0; transform: translateY(-120%) translateX(4px); }
 }
 
 #add-screen .screen-header h2 .title-sep {
@@ -1226,6 +1226,26 @@ input  { font-family: inherit; }
 .pool-filter-check input:checked ~ .pool-filter-label {
   color: #f0e68c;
   font-weight: 600;
+}
+
+.filter-clear-btn {
+  background: transparent;
+  border: 1px solid #555;
+  color: #888;
+  width: 22px;
+  height: 22px;
+  font-size: 0.72rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+  margin-left: 6px;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+.filter-clear-btn:hover {
+  border-color: #e06c6c;
+  color: #e06c6c;
 }
 
 /* ===== KEYWORD CHIPS ===== */
