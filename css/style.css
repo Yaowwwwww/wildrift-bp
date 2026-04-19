@@ -405,7 +405,7 @@ input  { font-family: inherit; }
 .card-star-icon {
   width: 16px;
   height: 16px;
-  background: rgba(0, 0, 0, 0.65);
+  background: #000;
   border: 1px solid rgba(240, 230, 140, 0.5);
   color: #f0e68c;
   font-size: 11px;
@@ -1162,11 +1162,11 @@ input  { font-family: inherit; }
 
 .add-selected-label {
   padding: 22px 28px 10px;
-  font-size: 1.45rem;
-  font-weight: 700;
+  font-size: 1.7rem;
+  font-weight: 800;
   color: #f5eac8;
   font-family: 'Cormorant Garamond', 'Noto Serif SC', Georgia, 'Songti SC', serif;
-  letter-spacing: 3px;
+  letter-spacing: 3.5px;
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.55);
 }
 
@@ -1697,14 +1697,18 @@ body.lang-en .champ-card.hp-active .champ-name .en { color: #f5f0a0; }
   }
 
   .keyword-chips {
-    padding: 8px 12px 0;
+    padding: 8px 12px 6px;
+  }
+  .keyword-chips .kw-chip {
+    font-size: 0.78rem;
+    padding: 5px 12px;
   }
   .search-wrap {
     padding: 0 12px;
   }
   .tagline-wrap {
     margin: 6px 12px 0;
-    padding: 16px 0;
+    padding: 12px 0;
   }
   .tagline-text {
     font-size: 0.72rem;
@@ -1713,7 +1717,10 @@ body.lang-en .champ-card.hp-active .champ-name .en { color: #f5f0a0; }
     text-align: center;
     color: #fff;
   }
-  .tagline-line { display: none; }
+  .tagline-line {
+    flex: 1;
+    max-width: 40px;
+  }
   .champ-grid {
     padding: 10px 28px 500px;
     gap: 9px;
