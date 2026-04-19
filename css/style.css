@@ -1144,7 +1144,7 @@ input  { font-family: inherit; }
 .visit-bubble {
   position: absolute;
   top: 50%;
-  right: -12px;
+  right: -14.5px;
   transform: translateY(-50%);
   color: #f0e68c;
   font-size: 0.62rem;
@@ -1398,14 +1398,17 @@ input  { font-family: inherit; }
 .kw-chip-plus {
   border-style: solid;
   color: #aaa;
-  padding: 8px;
+  padding: 0;
+  width: 36px;
+  height: 36px;
   font-size: 1rem;
   font-weight: 700;
   line-height: 1;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  aspect-ratio: 1 / 1;
+  align-self: center;
+  flex-shrink: 0;
 }
 .kw-chip-plus:hover { border-color: #bbb; color: #fff; }
 .kw-chip-plus.active { border-color: #f0e68c; color: #f0e68c; background: rgba(240,230,140,0.08); }
