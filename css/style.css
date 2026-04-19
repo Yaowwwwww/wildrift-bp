@@ -1051,7 +1051,7 @@ input  { font-family: inherit; }
   cursor: default;
 }
 .title-box:hover {
-  transform: scale(1.03);
+  transform: scale(1.02);
   box-shadow: 0 0 0 1px rgba(240,230,140,0.4), inset 0 0 16px rgba(240,230,140,0.06);
 }
 /* corner accents — all four corners */
@@ -1073,12 +1073,14 @@ input  { font-family: inherit; }
   letter-spacing: 3px;
   color: #ffe680;
   text-transform: uppercase;
+  text-shadow: 0 0 8px rgba(255, 230, 128, 0.6),
+               0 0 16px rgba(255, 230, 128, 0.3);
   transition: color 0.2s ease, text-shadow 0.2s ease;
 }
 .title-box:hover h2 {
   color: #fff8b0;
-  text-shadow: 0 0 10px rgba(255, 230, 128, 0.8),
-               0 0 20px rgba(255, 230, 128, 0.4);
+  text-shadow: 0 0 12px rgba(255, 230, 128, 0.9),
+               0 0 24px rgba(255, 230, 128, 0.5);
 }
 .title-box:hover .title-desc {
   color: #fff;
@@ -1192,17 +1194,9 @@ input  { font-family: inherit; }
   color: #f5eac8;
   font-family: 'Cormorant Garamond', 'Noto Serif SC', Georgia, 'Songti SC', serif;
   letter-spacing: 3.5px;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.55);
-  cursor: default;
-  transition: text-shadow 0.3s ease, color 0.3s ease;
-}
-.add-selected-label:hover {
-  color: #fff8d0;
-  text-shadow: 0 0 10px rgba(245, 234, 200, 0.7),
-               0 0 20px rgba(245, 234, 200, 0.4),
+  text-shadow: 0 0 8px rgba(245, 234, 200, 0.5),
+               0 0 18px rgba(245, 234, 200, 0.25),
                0 1px 3px rgba(0, 0, 0, 0.55);
-  transform: scale(1.03);
-  transform-origin: left center;
 }
 
 /* Pool / starred filter checkboxes shown under "My Champion Pool" label */
