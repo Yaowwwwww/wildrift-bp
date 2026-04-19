@@ -1738,6 +1738,8 @@ body.lang-en .champ-card.hp-active .champ-name .en { color: #f5f0a0; }
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
+    border-bottom: 1px dashed #2a2a2a !important;
+    display: flex !important;
   }
   .lane-tabs::-webkit-scrollbar { display: none; }
   .lane-tab {
@@ -1779,9 +1781,6 @@ body.lang-en .champ-card.hp-active .champ-name .en { color: #f5f0a0; }
     margin: 6px 12px 0;
     padding: 12px 0;
     border-bottom: 1px solid #2a2a2a;
-  }
-  .lane-tabs {
-    border-bottom: 1px dashed #2a2a2a;
   }
   .tagline-text {
     font-size: 0.88rem;
