@@ -87,7 +87,7 @@ input  { font-family: inherit; }
   gap: 8px;
   width: 100%;
   justify-content: flex-end;
-  order: -1;
+  order: 10;
 }
 .auth-row .auth-btn {
   flex: 1;
@@ -1067,6 +1067,14 @@ input  { font-family: inherit; }
   color: #f0e68c;
   text-transform: uppercase;
   transition: color 0.2s ease, text-shadow 0.2s ease;
+}
+
+body.lang-cn #add-screen .screen-header h2 {
+  font-size: 1.15rem;
+  letter-spacing: 3px;
+}
+body.lang-cn .title-box {
+  padding: 5px 12px;
 }
 
 .title-desc {
