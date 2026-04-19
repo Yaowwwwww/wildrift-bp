@@ -1513,7 +1513,7 @@ input  { font-family: inherit; }
   display: flex;
   gap: 0;
   padding: 10px 20px 0;
-  border-bottom: 1px solid #2a2a2a;
+  border-bottom: 1px dashed #2a2a2a;
 }
 
 .lane-tab {
@@ -1674,6 +1674,8 @@ body.lang-en .champ-card.hp-active .champ-name .en { color: #f5f0a0; }
     gap: 10px;
     padding: 10px 12px;
     row-gap: 8px;
+    position: static;
+    z-index: auto;
   }
   .nav-logo {
     width: 96px;
